@@ -1,18 +1,26 @@
-{
-    "env": {
+module.exports = {
+		root: true,
+		parser:  "@typescript-eslint/parser",
+		"plugins": [
+			"@typescript-eslint/eslint-plugin"
+		],
+		extends: [
+			"eslint:recommended",
+			"plugin:@typescript-eslint/recommended"
+		],
+    env: {
         "browser": true,
         "es6": true
     },
-    "extends": "eslint:recommended",
-    "globals": {
+    globals: {
         "Atomics": "readonly",
         "SharedArrayBuffer": "readonly"
     },
-    "parserOptions": {
+    parserOptions: {
         "ecmaVersion": 2018,
         "sourceType": "module"
     },
-    "rules": {
+    rules: {
         "indent": [
             "error",
             "tab"
@@ -29,5 +37,12 @@
             "error",
             "always"
         ]
-    }
+		},
+		overrides: {
+			files: ['**/*.ts'],
+			parser: 'typescript-eslint-parser',
+			rules: {
+				'no-undef': 'off'
+			}
+		}
 }
