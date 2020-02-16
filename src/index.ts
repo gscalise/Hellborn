@@ -1,7 +1,7 @@
 import * as PIXI from 'pixi.js';
 
 import { createStore, StoreCreator, Store } from 'redux';
-import reducer from './reducers/Reducer';
+import reducer, { customstore } from './stateManagement/reducers/Reducer';
 const store: customstore = createStore(
 	reducer
 	// window.__REDUX_DEVTOOLS_EXTENSION__ && window.__REDUX_DEVTOOLS_EXTENSION__());
@@ -9,7 +9,7 @@ const store: customstore = createStore(
 
 import Player from './actors/Player';
 import Enemy from './actors/Enemy';
-// import Grid from './physics/Grid.js';
+import Grid from './physics/Grid';
 // import Menu from './interface/Menu.js';
 import HealthBar from './interface/HealthBar';
 import Actor from './actors/Actor';
@@ -21,21 +21,6 @@ const app = new PIXI.Application({
 	resolution: window.devicePixelRatio,
 	resizeTo: window
 });
-
-interface Actors {
-	[id: string]: Actor;
-}
-
-interface State {
-	pause: boolean;
-	enemiesCount: number;
-	playersCount: number;
-	actors: Actors;
-}
-
-interface customstore extends Store {
-	getState: () => State;
-}
 
 function gameLoop(delta: unknown, player: Player, enemy: Enemy, healthBar: HealthBar): void{
 	if (!store.getState().pause) {
@@ -53,14 +38,22 @@ document.body.appendChild(app.view);
 
 app.loader.add('player', 'assets/player.png');
 app.loader.add('enemy', 'assets/enemy.png');
+app.loader.add('ground', 'assets/ground.png');
 
 app.loader.load((loader: unknown, resources: unknown) => {
 	const graphics = new PIXI.Graphics();
 	app.stage.interactive = true;
-	// const grid = new Grid(store);
-	const player = new Player(app.stage, PIXI.Sprite.from('player'), store);
-	const enemy = new Enemy(app.stage, PIXI.Sprite.from('enemy'), store);
-	const healthBar = new HealthBar(app.stage, graphics, store);
+	const ground = new PIXI.Container();
+	const groundImage = PIXI.Sprite.from('ground');
+	groundImage.zIndex = 0;
+	ground.width = 3500;
+	ground.height = 2000;
+	ground.addChild(groundImage);
+	app.stage.addChild(ground);
+	const grid = new Grid(ground, store);
+	const player = new Player(app.stage, ground, PIXI.Sprite.from('player'), store, 23);
+	const enemy = new Enemy(ground, PIXI.Sprite.from('enemy'), store, 57);
+	const healthBar = new HealthBar(ground, graphics, store);
 	// const menu = new Menu();
 	app.ticker.add(delta => gameLoop(delta, player, enemy, healthBar));
 });

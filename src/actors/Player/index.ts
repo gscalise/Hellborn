@@ -1,6 +1,7 @@
-import {createActor, /*move,*/ pause} from '../../actions/Action';
-import Actor from '../Actor';
-import { Store } from 'redux';
+import {/*move,*/ pause, addActor} from '../../stateManagement/actions/Action';
+import Actor from '../Actor';;
+import { interaction } from 'pixi.js';
+import { customstore } from '../../stateManagement/reducers/Reducer';
 
 interface keysDown {
 	w: boolean;
@@ -18,15 +19,11 @@ export default class Player extends Actor {
 	keysDown: keysDown;
 	mouseCoords: mouseCoords;
 
-	constructor(stage: PIXI.Container, sprite: PIXI.Sprite, store: Store) {
-		super(stage, sprite, store);
-		this.type = 'player';
-		this.id = `${this.type}${store.getState().playersCount + 1}`;
-
-		store.dispatch(createActor(this));
+	constructor(stage: PIXI.Container, ground: PIXI.Container, sprite: PIXI.Sprite, store: customstore, quadrant: number) {
+		const type ='player';
+		super(stage, sprite, store, type);
 		
-		this.store = store;
-		this.sprite = sprite;
+		this.sprite.zIndex = 1;
 		this.sprite.x = 100;
 		this.sprite.y = 100;
 		this.sprite.anchor.x = 0.5;
@@ -42,6 +39,7 @@ export default class Player extends Actor {
 		document.addEventListener('keyup', this.handleKeyUp.bind(this));
 		document.addEventListener('keydown', this.handleKeyPress.bind(this));
 		stage.on('mousemove', this.handleMouseMove.bind(this));
+		stage.on('mouseout', this.handleMouseOut.bind(this));
 
 		this.keysDown = {
 			w: false,
@@ -131,11 +129,19 @@ export default class Player extends Actor {
 	}
 
 	handleKeyPress(event: KeyboardEvent) {
-		if (event.code === 'Escape') this.store.dispatch(pause());
+		if (event.code === 'Escape') {
+			const isPaused = !this.store.getState().pause;
+			this.store.dispatch(pause(isPaused));
+		}
 	}
 
-	handleMouseMove(event: MouseEvent) {
-		this.mouseCoords.x = event.clientX;
-		this.mouseCoords.y = event.clientY;
+	handleMouseMove(event: interaction.InteractionEvent) {
+		this.mouseCoords.x = event.data.global.x;
+		this.mouseCoords.y = event.data.global.y;
 	}
+
+	handleMouseOut(event: interaction.InteractionEvent) {
+		this.store.dispatch(pause(true));
+	}
+
 }

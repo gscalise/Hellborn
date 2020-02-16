@@ -1,19 +1,16 @@
-import {createActor} from '../../actions/Action';
+import {addActor} from '../../stateManagement/actions/Action';
 import Actor from '../Actor';
 import { Store } from 'redux';
 import Player from '../Player';
 
 export default class Enemy extends Actor {
-	constructor(stage: PIXI.Container, sprite: PIXI.Sprite, store: Store) {
-		super(stage, sprite, store);
-		this.type = 'enemy';
-		this.id = `${this.type}${store.getState().enemiesCount + 1}`;
-
-		store.dispatch(createActor(this));
+	constructor(stage: PIXI.Container, sprite: PIXI.Sprite, store: Store, quadrant: number) {
+		const type = 'enemy';
+		super(stage, sprite, store, type);
 
 		this.attackReady = true;
 
-		this.sprite = sprite;
+		this.sprite.zIndex = 1;
 		this.sprite.x = 500;
 		this.sprite.y = 500;
 		this.sprite.anchor.x = 0.5;
