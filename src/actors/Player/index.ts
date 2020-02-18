@@ -18,28 +18,38 @@ interface mouseCoords {
 export default class Player extends Actor {
 	keysDown: keysDown;
 	mouseCoords: mouseCoords;
+	ground: PIXI.Container;
+	screen: PIXI.Rectangle;
 
-	constructor(stage: PIXI.Container, ground: PIXI.Container, sprite: PIXI.Sprite, store: customstore, quadrant: number) {
+	constructor(screen: PIXI.Rectangle, camera: PIXI.Container, ground: PIXI.Container, sprite: PIXI.Sprite, store: customstore, quadrant: number) {
 		const type ='player';
-		super(stage, sprite, store, type);
+		super(camera, sprite, store, type);
 		
+		this.ground = ground;
+		this.screen = screen;
+
 		this.sprite.zIndex = 1;
-		this.sprite.x = 100;
-		this.sprite.y = 100;
+		this.sprite.x = -this.ground.x + screen.width/2;
+		this.sprite.y = -this.ground.y + screen.height/2;
 		this.sprite.anchor.x = 0.5;
 		this.sprite.anchor.y = 0.5;
 		this.speed = 3;
 		this.sprite.rotation = -(3*Math.PI/2);
 		this.sprite.interactive = true;
-		stage.addChild(this.sprite);
+		ground.addChild(this.sprite);
 
 		this.health = 100;
 
 		document.addEventListener('keydown', this.handleKeyDown.bind(this));
 		document.addEventListener('keyup', this.handleKeyUp.bind(this));
 		document.addEventListener('keydown', this.handleKeyPress.bind(this));
-		stage.on('mousemove', this.handleMouseMove.bind(this));
-		stage.on('mouseout', this.handleMouseOut.bind(this));
+		window.onresize = () => {
+			console.log(this.ground.height);
+			this.ground.x = -this.sprite.x + screen.width/2;
+			this.ground.y = -this.sprite.y + screen.height/2;
+		};
+		ground.on('mousemove', this.handleMouseMove.bind(this));
+		camera.on('mouseout', this.handleMouseOut.bind(this));
 
 		this.keysDown = {
 			w: false,
@@ -98,9 +108,20 @@ export default class Player extends Actor {
 			}
 		}
 
+		const horizontalSpeed = this.speed * Math.cos(direction);
+		const verticalSpeed = this.speed * Math.sin(direction);
+
 		if (this.status.moving) {
-			this.sprite.x = this.sprite.x + this.speed * Math.cos(direction);
-			this.sprite.y = this.sprite.y + this.speed * Math.sin(direction);
+			this.sprite.x = this.sprite.x + horizontalSpeed;
+			this.sprite.y = this.sprite.y + verticalSpeed;
+			if ((this.sprite.x - screen.width/2) > 0 && (this.sprite.x + screen.width/2) < this.ground.width) {
+				this.ground.x = this.ground.x - horizontalSpeed;
+				this.mouseCoords.x = this.mouseCoords.x + horizontalSpeed;
+			}
+			if ((this.sprite.y - screen.height/2) > 0 && (this.sprite.y + screen.height/2) < this.ground.height) {
+				this.ground.y = this.ground.y - verticalSpeed;
+				this.mouseCoords.y = this.mouseCoords.y + verticalSpeed;
+			}
 		}
 
 		// this.store.dispatch(move(this));
@@ -136,8 +157,8 @@ export default class Player extends Actor {
 	}
 
 	handleMouseMove(event: interaction.InteractionEvent) {
-		this.mouseCoords.x = event.data.global.x;
-		this.mouseCoords.y = event.data.global.y;
+		this.mouseCoords.x = event.data.getLocalPosition(this.ground).x;
+		this.mouseCoords.y = event.data.getLocalPosition(this.ground).y;
 	}
 
 	handleMouseOut(event: interaction.InteractionEvent) {

@@ -41,19 +41,23 @@ app.loader.add('enemy', 'assets/enemy.png');
 app.loader.add('ground', 'assets/ground.png');
 
 app.loader.load((loader: unknown, resources: unknown) => {
-	const graphics = new PIXI.Graphics();
-	app.stage.interactive = true;
+
+	const camera = new PIXI.Container();
+	camera.interactive = true;
 	const ground = new PIXI.Container();
-	const groundImage = PIXI.Sprite.from('ground');
-	groundImage.zIndex = 0;
-	ground.width = 3500;
-	ground.height = 2000;
-	ground.addChild(groundImage);
-	app.stage.addChild(ground);
+	ground.interactive = true;
+	const groundSprite = PIXI.Sprite.from('ground');
+	groundSprite.zIndex = 0;
+	ground.addChild(groundSprite);
+	camera.addChild(ground);
+	app.stage.addChild(camera);
+
 	const grid = new Grid(ground, store);
-	const player = new Player(app.stage, ground, PIXI.Sprite.from('player'), store, 23);
+	const player = new Player(app.screen, camera, ground, PIXI.Sprite.from('player'), store, 23);
 	const enemy = new Enemy(ground, PIXI.Sprite.from('enemy'), store, 57);
-	const healthBar = new HealthBar(ground, graphics, store);
+	
+	const graphics = new PIXI.Graphics();
+	const healthBar = new HealthBar(camera, graphics, store);
 	// const menu = new Menu();
 	app.ticker.add(delta => gameLoop(delta, player, enemy, healthBar));
 });
