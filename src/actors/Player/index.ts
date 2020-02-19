@@ -2,6 +2,7 @@ import {/*move,*/ pause, addActor} from '../../stateManagement/actions/Action';
 import Actor from '../Actor';;
 import { interaction } from 'pixi.js';
 import { customstore } from '../../stateManagement/reducers/Reducer';
+import { Quadrant } from '../../physics/Grid';
 
 interface keysDown {
 	w: boolean;
@@ -20,34 +21,31 @@ export default class Player extends Actor {
 	mouseCoords: mouseCoords;
 	ground: PIXI.Container;
 	screen: PIXI.Rectangle;
+	camera: PIXI.Container;
 
-	constructor(screen: PIXI.Rectangle, camera: PIXI.Container, ground: PIXI.Container, sprite: PIXI.Sprite, store: customstore, quadrant: number) {
-		const type ='player';
-		super(camera, sprite, store, type);
-		
+	constructor(screen: PIXI.Rectangle, camera: PIXI.Container, ground: PIXI.Container, texture: PIXI.Texture, store: customstore, quadrantIndex: string) {
+		const type = 'player';
+		super(texture, store, type, quadrantIndex);
+
 		this.ground = ground;
 		this.screen = screen;
 
-		this.sprite.zIndex = 1;
-		this.sprite.x = -this.ground.x + screen.width/2;
-		this.sprite.y = -this.ground.y + screen.height/2;
-		this.sprite.anchor.x = 0.5;
-		this.sprite.anchor.y = 0.5;
+		this.zIndex = 1;
+		this.anchor.x = 0.5;
+		this.anchor.y = 0.5;
+
+		this.centerCamera();
+
 		this.speed = 3;
-		this.sprite.rotation = -(3*Math.PI/2);
-		this.sprite.interactive = true;
-		ground.addChild(this.sprite);
+		this.rotation = -(3*Math.PI/2);
+		this.interactive = true;
 
 		this.health = 100;
 
 		document.addEventListener('keydown', this.handleKeyDown.bind(this));
 		document.addEventListener('keyup', this.handleKeyUp.bind(this));
 		document.addEventListener('keydown', this.handleKeyPress.bind(this));
-		window.onresize = () => {
-			console.log(this.ground.height);
-			this.ground.x = -this.sprite.x + screen.width/2;
-			this.ground.y = -this.sprite.y + screen.height/2;
-		};
+		window.onresize = this.centerCamera.bind(this);
 		ground.on('mousemove', this.handleMouseMove.bind(this));
 		camera.on('mouseout', this.handleMouseOut.bind(this));
 
@@ -65,6 +63,7 @@ export default class Player extends Actor {
 
 		this.control = this.control.bind(this);
 		this.controlMovement = this.controlMovement.bind(this);
+		this.centerCamera = this.centerCamera.bind(this);
 	}
 
 	control() {
@@ -95,7 +94,7 @@ export default class Player extends Actor {
 				if (this.status.moving == true) this.status.moving = false;
 				else {
 					direction = Math.PI;
-					this.status.moving= true;
+					this.status.moving = true;
 				}
 			}
 			else if (direction > 0) {
@@ -112,13 +111,13 @@ export default class Player extends Actor {
 		const verticalSpeed = this.speed * Math.sin(direction);
 
 		if (this.status.moving) {
-			this.sprite.x = this.sprite.x + horizontalSpeed;
-			this.sprite.y = this.sprite.y + verticalSpeed;
-			if ((this.sprite.x - screen.width/2) > 0 && (this.sprite.x + screen.width/2) < this.ground.width) {
+			this.move(horizontalSpeed, verticalSpeed);
+
+			if ((this.x - screen.width/2) > 0 && (this.x + screen.width/2) < this.ground.width) {
 				this.ground.x = this.ground.x - horizontalSpeed;
 				this.mouseCoords.x = this.mouseCoords.x + horizontalSpeed;
 			}
-			if ((this.sprite.y - screen.height/2) > 0 && (this.sprite.y + screen.height/2) < this.ground.height) {
+			if ((this.y - screen.height/2) > 0 && (this.y + screen.height/2) < this.ground.height) {
 				this.ground.y = this.ground.y - verticalSpeed;
 				this.mouseCoords.y = this.mouseCoords.y + verticalSpeed;
 			}
@@ -128,11 +127,11 @@ export default class Player extends Actor {
 	}
 
 	controlSight() {
-		let angle = Math.atan((this.mouseCoords.y - this.sprite.y)/(this.mouseCoords.x - this.sprite.x));
-		if (this.mouseCoords.x <= this.sprite.x) {
+		let angle = Math.atan((this.mouseCoords.y - this.y)/(this.mouseCoords.x - this.x));
+		if (this.mouseCoords.x < this.x) {
 			angle = Math.PI + angle;
 		} 
-		this.sprite.rotation = angle;
+		this.rotation = angle;
 	}
 
 	handleKeyDown(event: KeyboardEvent) {
@@ -165,4 +164,16 @@ export default class Player extends Actor {
 		this.store.dispatch(pause(true));
 	}
 
+	centerCamera() {
+		if (-this.x + this.screen.width/2 >= 0 || -this.x + this.screen.width/2 >= this.ground.width) {
+			this.ground.x = 0;
+		} else {
+			this.ground.x = -this.x + this.screen.width/2;
+		}
+		if (-this.y + this.screen.height/2 >= 0 || -this.y + this.screen.height/2 >= this.ground.height) {
+			this.ground.y = 0;
+		} else {
+			this.ground.y = -this.y + this.screen.height/2;
+		}
+	}
 }

@@ -15,6 +15,13 @@ export function addActor(actor: Actor) {
 	};
 }
 
+export function moveActor(actor: Actor) {
+	return {
+		type: 'MOVE_ACTOR',
+		actor: actor
+	};
+}
+
 export function addGrid(grid: Grid) {
 	return {
 		type: 'ADD_GRID',

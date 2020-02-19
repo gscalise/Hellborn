@@ -1,10 +1,16 @@
 import * as PIXI from 'pixi.js';
 
-import { createStore, StoreCreator, Store } from 'redux';
+
+// initialize store for state management
+import { createStore, StoreEnhancer } from 'redux';
 import reducer, { customstore } from './stateManagement/reducers/Reducer';
+interface WindowWithReduxTools {
+	__REDUX_DEVTOOLS_EXTENSION__: () => StoreEnhancer<customstore, unknown>;
+}
 const store: customstore = createStore(
-	reducer
-	// window.__REDUX_DEVTOOLS_EXTENSION__ && window.__REDUX_DEVTOOLS_EXTENSION__());
+	reducer,
+	// (window as unknown as WindowWithReduxTools).__REDUX_DEVTOOLS_EXTENSION__ && 
+	(window as unknown as WindowWithReduxTools).__REDUX_DEVTOOLS_EXTENSION__()
 );
 
 import Player from './actors/Player';
@@ -12,9 +18,8 @@ import Enemy from './actors/Enemy';
 import Grid from './physics/Grid';
 // import Menu from './interface/Menu.js';
 import HealthBar from './interface/HealthBar';
-import Actor from './actors/Actor';
 
-//Create a Pixi Application
+// initialize application
 const app = new PIXI.Application({
 	width: window.innerWidth,
 	height: window.innerHeight,
@@ -33,32 +38,41 @@ function gameLoop(delta: unknown, player: Player, enemy: Enemy, healthBar: Healt
 	}
 }
 
-//Add the canvas that Pixi automatically created for you to the HTML document
 document.body.appendChild(app.view);
 
+// load sprites
 app.loader.add('player', 'assets/player.png');
 app.loader.add('enemy', 'assets/enemy.png');
 app.loader.add('ground', 'assets/ground.png');
 
 app.loader.load((loader: unknown, resources: unknown) => {
-
-	const camera = new PIXI.Container();
-	camera.interactive = true;
-	const ground = new PIXI.Container();
-	ground.interactive = true;
+	// initialize camera and ground
 	const groundSprite = PIXI.Sprite.from('ground');
 	groundSprite.zIndex = 0;
+	const ground = new PIXI.Container();
+	ground.interactive = true;
 	ground.addChild(groundSprite);
+	
+	const camera = new PIXI.Container();
+	camera.interactive = true;
 	camera.addChild(ground);
+
 	app.stage.addChild(camera);
 
+	// initialize grid for collisions
 	const grid = new Grid(ground, store);
-	const player = new Player(app.screen, camera, ground, PIXI.Sprite.from('player'), store, 23);
-	const enemy = new Enemy(ground, PIXI.Sprite.from('enemy'), store, 57);
+
+	// initialize player and enemy
+	const player = new Player(app.screen, camera, ground, PIXI.Texture.from('player'), store, '45');
+	ground.addChild(player);
+	const enemy = new Enemy(ground, PIXI.Texture.from('enemy'), store, '42');
+	ground.addChild(enemy);
 	
+	// initialize interface
 	const graphics = new PIXI.Graphics();
 	const healthBar = new HealthBar(camera, graphics, store);
 	// const menu = new Menu();
+
 	app.ticker.add(delta => gameLoop(delta, player, enemy, healthBar));
 });
 

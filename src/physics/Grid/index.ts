@@ -1,13 +1,12 @@
 import { customstore } from "../../stateManagement/reducers/Reducer";
 import {addGrid} from '../../stateManagement/actions/Action';
-import Actor from "../../actors/Actor";
 
-interface Quadrant {
+export interface Quadrant {
 	x1: number;
 	y1: number;
 	x2: number;
 	y2: number;
-	activeActors: Actor[];
+	activeActors: string[];
 }
 
 export default class Grid {
