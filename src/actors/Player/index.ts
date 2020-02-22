@@ -1,8 +1,6 @@
-import {/*move,*/ pause, addActor} from '../../stateManagement/actions/Action';
-import Actor from '../Actor';;
+import Actor, { quadrantIndex } from '../Actor';
 import { interaction } from 'pixi.js';
-import { customstore } from '../../stateManagement/reducers/Reducer';
-import { Quadrant } from '../../physics/Grid';
+import GameState from '../../stateManagement/GameState';
 
 interface keysDown {
 	w: boolean;
@@ -19,16 +17,17 @@ interface mouseCoords {
 export default class Player extends Actor {
 	keysDown: keysDown;
 	mouseCoords: mouseCoords;
-	ground: PIXI.Container;
 	screen: PIXI.Rectangle;
 	camera: PIXI.Container;
+	bulletTexture: PIXI.Texture;
 
-	constructor(screen: PIXI.Rectangle, camera: PIXI.Container, ground: PIXI.Container, texture: PIXI.Texture, store: customstore, quadrantIndex: string) {
+	constructor(screen: PIXI.Rectangle, camera: PIXI.Container, ground: PIXI.Container, texture: PIXI.Texture, state: GameState, quadrantIndex: quadrantIndex) {
 		const type = 'player';
-		super(texture, store, type, quadrantIndex);
+		super(texture, state, type, quadrantIndex, ground);
 
 		this.ground = ground;
 		this.screen = screen;
+		this.camera = camera;
 
 		this.zIndex = 1;
 		this.anchor.x = 0.5;
@@ -36,7 +35,7 @@ export default class Player extends Actor {
 
 		this.centerCamera();
 
-		this.speed = 3;
+		this.speed = 4;
 		this.rotation = -(3*Math.PI/2);
 		this.interactive = true;
 
@@ -46,8 +45,9 @@ export default class Player extends Actor {
 		document.addEventListener('keyup', this.handleKeyUp.bind(this));
 		document.addEventListener('keydown', this.handleKeyPress.bind(this));
 		window.onresize = this.centerCamera.bind(this);
-		ground.on('mousemove', this.handleMouseMove.bind(this));
+		camera.on('mousemove', this.handleMouseMove.bind(this));
 		camera.on('mouseout', this.handleMouseOut.bind(this));
+		// ground.on('click', this.shoot.bind(this));
 
 		this.keysDown = {
 			w: false,
@@ -61,12 +61,13 @@ export default class Player extends Actor {
 			y: 500
 		};
 
-		this.control = this.control.bind(this);
+		this.act = this.act.bind(this);
 		this.controlMovement = this.controlMovement.bind(this);
 		this.centerCamera = this.centerCamera.bind(this);
 	}
 
-	control() {
+	act() {
+		this.centerCamera();
 		this.controlMovement();
 		this.controlSight();
 	}
@@ -106,29 +107,16 @@ export default class Player extends Actor {
 				this.status.moving = true;
 			}
 		}
-
-		const horizontalSpeed = this.speed * Math.cos(direction);
-		const verticalSpeed = this.speed * Math.sin(direction);
-
 		if (this.status.moving) {
-			this.move(horizontalSpeed, verticalSpeed);
-
-			if ((this.x - screen.width/2) > 0 && (this.x + screen.width/2) < this.ground.width) {
-				this.ground.x = this.ground.x - horizontalSpeed;
-				this.mouseCoords.x = this.mouseCoords.x + horizontalSpeed;
-			}
-			if ((this.y - screen.height/2) > 0 && (this.y + screen.height/2) < this.ground.height) {
-				this.ground.y = this.ground.y - verticalSpeed;
-				this.mouseCoords.y = this.mouseCoords.y + verticalSpeed;
-			}
+			this.calculateDestination(direction, this.speed);
 		}
-
-		// this.store.dispatch(move(this));
 	}
 
 	controlSight() {
-		let angle = Math.atan((this.mouseCoords.y - this.y)/(this.mouseCoords.x - this.x));
-		if (this.mouseCoords.x < this.x) {
+		const actorRelativeToCameraX = this.x + this.ground.x;
+		const actorRelativeToCameraY = this.y + this.ground.y;
+		let angle = Math.atan((this.mouseCoords.y - actorRelativeToCameraY)/(this.mouseCoords.x - actorRelativeToCameraX));
+		if (this.mouseCoords.x < actorRelativeToCameraX) {
 			angle = Math.PI + angle;
 		} 
 		this.rotation = angle;
@@ -150,30 +138,62 @@ export default class Player extends Actor {
 
 	handleKeyPress(event: KeyboardEvent) {
 		if (event.code === 'Escape') {
-			const isPaused = !this.store.getState().pause;
-			this.store.dispatch(pause(isPaused));
+			const isPaused = !this.state.pause;
+			this.state.pause = isPaused;
 		}
 	}
 
 	handleMouseMove(event: interaction.InteractionEvent) {
-		this.mouseCoords.x = event.data.getLocalPosition(this.ground).x;
-		this.mouseCoords.y = event.data.getLocalPosition(this.ground).y;
+		this.mouseCoords.x = event.data.getLocalPosition(this.camera).x;
+		this.mouseCoords.y = event.data.getLocalPosition(this.camera).y;
 	}
 
 	handleMouseOut(event: interaction.InteractionEvent) {
-		this.store.dispatch(pause(true));
+		this.state.pause = true;
 	}
 
 	centerCamera() {
-		if (-this.x + this.screen.width/2 >= 0 || -this.x + this.screen.width/2 >= this.ground.width) {
-			this.ground.x = 0;
-		} else {
-			this.ground.x = -this.x + this.screen.width/2;
+		let x = this.x - this.screen.width/2;
+		let y = this.y - this.screen.height/2;
+		if (this.x - this.screen.width/2 <= 0) {
+			x = 0;
 		}
-		if (-this.y + this.screen.height/2 >= 0 || -this.y + this.screen.height/2 >= this.ground.height) {
-			this.ground.y = 0;
-		} else {
-			this.ground.y = -this.y + this.screen.height/2;
+		if (this.x + this.screen.width/2 >= this.ground.width) {
+			x = this.ground.width - this.screen.width;
 		}
+		if (this.y - this.screen.height/2 <= 0) {
+			y = 0;
+		}
+		if (this.y + this.screen.height/2 >= this.ground.height) {
+			y = this.ground.height - this.screen.height;
+		}
+		this.ground.x = -x;
+		this.ground.y = -y;
+	}
+
+	shoot() {
+		// let mainQuadrantIndex;
+		// if (this.currentQuadrants.length = 1) {
+		// 	mainQuadrantIndex = this.currentQuadrants[0];
+		// }
+		// else {
+		// 	for (let i = 0, quadrantsCount 	= this.currentQuadrants.length; i < quadrantsCount; i++) {
+		// 		let mainQuadrantFound = false;
+		// 		if (mainQuadrantFound) { break; };
+		// 		const currentQuadrantIndex = this.currentQuadrants[i];
+		// 		const quadrant = this.state.grid.quadrants[currentQuadrantIndex.xIndex][currentQuadrantIndex.yIndex];
+		// 		if (this.x <= quadrant.x2 &&
+		// 				this.x >= quadrant.x1 &&
+		// 				this.y <= quadrant.y2 &&
+		// 				this.y >= quadrant.y1) {
+		// 					mainQuadrantIndex = currentQuadrantIndex;
+		// 			mainQuadrantFound = true;
+		// 		}
+		// 	}
+		// }
+		// const playerFaceCenterX = this.x + this.hitBoxRadius * Math.cos(this.rotation);
+		// const playerFaceCenterY = this.y + this.hitBoxRadius * Math.sin(this.rotation);
+		// const bullet = new Projectile(this.bulletTexture, this.state, 'bullet', mainQuadrantIndex, playerFaceCenterX, playerFaceCenterY, this.rotation);
+		// this.ground.addChild(bullet);
 	}
 }

@@ -1,19 +1,19 @@
-import { Store } from "redux";
+import GameState from "../../stateManagement/GameState";
 
 export default class HealthBar {
 	graphics: PIXI.Graphics;
-	store: Store;
+	state: GameState;
 
-	constructor(stage: PIXI.Container, graphics: PIXI.Graphics, store: Store) {
+	constructor(stage: PIXI.Container, graphics: PIXI.Graphics, state: GameState) {
 		this.graphics = graphics;
-		this.store = store;
+		this.state = state;
 		stage.addChild(this.graphics);
 
 		this.monitor = this.monitor.bind(this);
 	}
 
 	monitor() {
-		const healthCount = this.store.getState().actors.player1.health;
+		const healthCount = this.state.actors.player1.health;
 		this.graphics.clear();
 		this.graphics.beginFill(0xDE3249);
 		this.graphics.drawRect(50, 50, 2 * healthCount, 20);
