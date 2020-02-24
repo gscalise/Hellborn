@@ -15,33 +15,42 @@ export default class Enemy extends Actor {
 		this.anchor.y = 0.5;
 		this.speed = 3;
 		this.rotation = -(Math.PI/2);
-		this.interactive = true;
+
+		this.strength = 80;
+		this.health = 80;
+		this.movable = true;
 
 		this.attack = this.attack.bind(this);
 		this.act = this.act.bind(this);
 	}
-
-	act(): void {
+	
+	prepare() {
 		this.status.moving = true;
+		this.speed = 3;
+
 		const player = this.state.actors.player1;
 		// temporarily set as player1 cause there's no multiplayer yet
 		const playerX = player.x;
 		const playerY = player.y;
 		const verticalDistance = playerY - this.y;
 		const horizontalDistance = playerX - this.x;
-		let direction = MathHelper.floorToTwo(Math.atan(verticalDistance/horizontalDistance));
-		if (playerX < this.x) {
-			direction = MathHelper.floorToTwo(Math.PI) + direction;
-		} 
+		let direction = Math.atan2(verticalDistance, horizontalDistance);
 		this.rotation = direction;
 
-		this.calculateDestination(direction, this.speed);
-		// this.move();
+		this.calculateDestination(direction);
 		
-		const distance = Math.sqrt(verticalDistance*verticalDistance + horizontalDistance*horizontalDistance);
-		if (distance < 50 && this.attackReady) {
+		const quadDistance = verticalDistance*verticalDistance + horizontalDistance*horizontalDistance;
+		if (quadDistance <= this.hitBoxRadius*this.hitBoxRadius && this.attackReady) {
 			// this.attack(player);
 		}
+		// if (this.health <= 0) {
+		// 	this.ground.removeChild(this);
+
+		// }
+	}
+
+	act(): void {
+		this.move();
 	}
 
 	attack(player: Player): void {

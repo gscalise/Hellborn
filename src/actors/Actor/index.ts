@@ -26,6 +26,8 @@ export default class Actor extends Sprite {
 	isObstacle: boolean;
 	destination: PIXI.Point;
 	ground: PIXI.Container;
+	strength: number;
+	movable: boolean;
 
 	constructor(texture: PIXI.Texture, state: GameState, type: string, quadrantIndex: quadrantIndex, ground: PIXI.Container) {
 		super(texture);
@@ -33,9 +35,9 @@ export default class Actor extends Sprite {
 		this.ground = ground;
 
 		this.type = type;
-		if (type == 'enemy') this.id = this.type + state.enemiesCount + 1;
+		if (type == 'enemy') this.id = this.type + (state.enemiesCount + 1);
 		if (type == 'player') this.id = this.type + (state.playersCount + 1);
-		if (type == 'bullet') this.id = this.type;
+		if (type == 'projectile') this.id = this.type + (state.projectilesCount + 1);
 
 		this.hitBoxRadius = Math.floor(Math.sqrt(this.height/2*this.height/2 + this.width/2*this.width/2));
 		this.currentQuadrants = [];
@@ -60,49 +62,7 @@ export default class Actor extends Sprite {
 		this.state.addActor(this);
 
 		this.move = this.move.bind(this);
-		this.collide = this.collide.bind(this);
 		this.calculateDestination = this.calculateDestination.bind(this);
-	}
-
-	act(){}
-
-	collide(withActor: Actor) {
-		if (this.status.moving) {
-			let newDirection;
-			let newSpeed = this.speed;
-			const PIFlooredToThree = MathHelper.floorToTwo(Math.PI);
-
-			const horizontalDistanceToActor = this.x - withActor.x;
-			const verticalDistanceToActor = this.y - withActor.y;
-			let directionToActor = MathHelper.floorToTwo(Math.atan(verticalDistanceToActor/horizontalDistanceToActor));
-			// if (this.x <= withActor.x) {
-			// 	directionToActor = PIFlooredToThree + directionToActor;
-			// } 
-
-			const horizontalDistanceToDestination = this.x - this.destination.x;
-			const verticalDistanceToDestination = this.y - this.destination.y;
-			let directionToDestination = MathHelper.floorToTwo(Math.atan(verticalDistanceToDestination/horizontalDistanceToDestination));
-			// if (this.x <= this.destination.x) {
-			// 	directionToDestination = PIFlooredToThree + directionToDestination;
-			// } 
-			newDirection = directionToDestination;
-
-			console.log(directionToDestination + '----' + directionToActor);
-			if (directionToDestination !== directionToActor) {
-			}
-			else {
-				newSpeed = 0;
-			}
-			if (this.speed > withActor.speed) {
-			}
-			if (this.speed < withActor.speed) {
-				if (withActor.status.moving) {
-					newSpeed = 0;
-				}
-			}
-			this.calculateDestination(newDirection, newSpeed);
-			console.log(newDirection);
-		}
 	}
 
 	move() {
@@ -111,9 +71,9 @@ export default class Actor extends Sprite {
 		this.state.moveActor(this);
 	}
 
-	calculateDestination(direction: number, speed: number) {
-		let x = this.x + speed * Math.cos(direction);
-		let y = this.y + speed * Math.sin(direction);
+	calculateDestination(direction: number) {
+		let x = this.x + this.speed * Math.cos(direction);
+		let y = this.y + this.speed * Math.sin(direction);
 		if (x <= 0) {
 			x = this.hitBoxRadius;
 		}
@@ -129,4 +89,12 @@ export default class Actor extends Sprite {
 		this.destination.x = x;
 		this.destination.y = y;
 	}
+
+	reduceHealth(damage: number) {
+		this.health = this.health - damage;
+	}
+	prepare() {}
+	act(){}
+	hit(actor: Actor){}
+	
 }

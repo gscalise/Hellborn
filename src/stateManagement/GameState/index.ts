@@ -1,26 +1,23 @@
 import Grid from '../../physics/Grid';
 import Actor from '../../actors/Actor';
-import Collision from '../../physics/Collision';
 
 export interface Actors {
 	[id: string]: Actor;
-}
-
-export interface Pair {
-	firstActor: Actor;
-	secondActor: Actor;
 }
 
 export default class GameState {
 	pause: boolean;
 	enemiesCount: number;
 	playersCount: number;
+	projectilesCount: number;
 	grid: Grid;
 	actors: Actors;
+
 	constructor() {
 		this.pause = true;
 		this.enemiesCount = 0;
 		this.playersCount = 0;
+		this.projectilesCount = 0;
 		this.actors = {};
 
 		this.play = this.play.bind(this);
@@ -41,6 +38,9 @@ export default class GameState {
 			case 'player':
 				this.playersCount = this.playersCount + 1;
 				break;
+			case 'projectile':
+				this.projectilesCount = this.projectilesCount + 1;
+				break;
 			}
 			const quadrantToAddActorTo = actor.currentQuadrants[0];
 			this.grid.quadrants[quadrantToAddActorTo.xIndex][quadrantToAddActorTo.yIndex].activeActors.push(actor.id);
@@ -48,44 +48,21 @@ export default class GameState {
 	}
 
 	play() {
+		console.log(this);
 		for (let actorID in this.actors) {
-			this.actors[actorID].act();
-		}
-		let pairs = [];
-		for (let dimensionIndex = 0; dimensionIndex < this.grid.quadrants.length; dimensionIndex++) {
-			const dimension = this.grid.quadrants[dimensionIndex];
-			for (let quadrantIndexInArray = 0; quadrantIndexInArray < dimension.length; quadrantIndexInArray++) {
-				const quadrant = dimension[quadrantIndexInArray];
-				if (quadrant.activeActors.length > 1) {
-					for (let i = 0; i < quadrant.activeActors.length; i++) {
-						const firstActorToCheck = this.actors[quadrant.activeActors[i]];
-						for (let j = i + 1; j < quadrant.activeActors.length; j++) {							
-							const secondActorToCheck = this.actors[quadrant.activeActors[j]];
-							const pair = {firstActor: firstActorToCheck, secondActor: secondActorToCheck};
-							if (!this.isPairCheckedForCollision(pairs, pair)) {
-								pairs.push(pair);
-								Collision.check(pair);
-							}
-
-						}
-					}
-				}
+			if (this.actors[actorID].status.alive) {
+				this.actors[actorID].prepare();
 			}
 		}
+		this.grid.checkCollisions(this.actors);
+
 		for (let actorID in this.actors) {
-			this.actors[actorID].move();
+			if (this.actors[actorID].status.moving) {
+				this.actors[actorID].act();
+			}
 		}
 	}
 	
-	isPairCheckedForCollision(pairs: Pair[], pair: Pair) {
-		let isPairChecked = false;
-		let quadrantIndexInArray = pairs.findIndex((currentPair) => {
-			if (currentPair.firstActor == pair.firstActor && currentPair.secondActor == currentPair.secondActor) {
-				return true;
-			}
-		});
-		if (quadrantIndexInArray > -1) isPairChecked = true;
-		return isPairChecked;
-	}
+
 }
 

@@ -55,11 +55,12 @@ app.loader.load((loader: unknown, resources: unknown) => {
 	const grid = new Grid(ground, state);
 
 	// initialize player and enemy
-	const player = new Player(app.screen, camera, ground, PIXI.Texture.from('player'), state, {xIndex: 4, yIndex: 5});
+	const player = new Player(app.screen, camera, ground, PIXI.Texture.from('player'), state, {xIndex: 4, yIndex: 5}, PIXI.Texture.from('bullet'));
 	ground.addChild(player);
 	const enemy = new Enemy(ground, PIXI.Texture.from('enemy'), state, {xIndex: 4, yIndex: 2});
 	ground.addChild(enemy);
-
+	// const anotherEnemy = new Enemy(ground, PIXI.Texture.from('enemy'), state, {xIndex: 5, yIndex: 7});
+	// ground.addChild(anotherEnemy);
 	// const wall = new Actor(PIXI.Texture.from('wall'), state, 'wall', {xIndex: 4, yIndex: 4});
 	// ground.addChild(wall);
 	

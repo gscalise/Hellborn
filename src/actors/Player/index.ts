@@ -1,6 +1,7 @@
 import Actor, { quadrantIndex } from '../Actor';
 import { interaction } from 'pixi.js';
 import GameState from '../../stateManagement/GameState';
+import Projectile from '../Projectile';
 
 interface keysDown {
 	w: boolean;
@@ -21,13 +22,14 @@ export default class Player extends Actor {
 	camera: PIXI.Container;
 	bulletTexture: PIXI.Texture;
 
-	constructor(screen: PIXI.Rectangle, camera: PIXI.Container, ground: PIXI.Container, texture: PIXI.Texture, state: GameState, quadrantIndex: quadrantIndex) {
+	constructor(screen: PIXI.Rectangle, camera: PIXI.Container, ground: PIXI.Container, texture: PIXI.Texture, state: GameState, quadrantIndex: quadrantIndex, bulletTexture: PIXI.Texture) {
 		const type = 'player';
 		super(texture, state, type, quadrantIndex, ground);
 
 		this.ground = ground;
 		this.screen = screen;
 		this.camera = camera;
+		this.bulletTexture = bulletTexture;
 
 		this.zIndex = 1;
 		this.anchor.x = 0.5;
@@ -41,13 +43,16 @@ export default class Player extends Actor {
 
 		this.health = 100;
 
+		this.strength = 90;
+		this.movable = true;
+
 		document.addEventListener('keydown', this.handleKeyDown.bind(this));
 		document.addEventListener('keyup', this.handleKeyUp.bind(this));
 		document.addEventListener('keydown', this.handleKeyPress.bind(this));
 		window.onresize = this.centerCamera.bind(this);
 		camera.on('mousemove', this.handleMouseMove.bind(this));
 		camera.on('mouseout', this.handleMouseOut.bind(this));
-		// ground.on('click', this.shoot.bind(this));
+		camera.on('click', this.shoot.bind(this));
 
 		this.keysDown = {
 			w: false,
@@ -66,59 +71,71 @@ export default class Player extends Actor {
 		this.centerCamera = this.centerCamera.bind(this);
 	}
 
-	act() {
-		this.centerCamera();
+	prepare() {
 		this.controlMovement();
 		this.controlSight();
 	}
 
+	act() {
+		this.move();
+		this.centerCamera();
+	}
+
 	controlMovement() {
 		let direction = 0;
+		this.speed = 4;
 		this.status.moving = false;
 		if (this.keysDown.w) {
 			this.status.moving = true;
 			direction = -Math.PI/2;
 		}
 		if (this.keysDown.s) {
-			if (!this.status.moving) {
+			if (this.keysDown.w) {
+				this.status.moving = false;
+			}
+			else {
 				direction = Math.PI/2;
 				this.status.moving = true;
 			}
-			else this.status.moving = false;
 		}
 		if (this.keysDown.d) {   
-			direction = direction/2;
+			if (this.keysDown.s) {
+				direction = direction - Math.PI/4;
+			}
+			if (this.keysDown.w) {
+				direction = direction + Math.PI/4;
+			}
+			if (!this.keysDown.s && !this.keysDown.w) {
+				direction = 0;
+			}
 			this.status.moving = true;
 		}
 		if (this.keysDown.a) {
-			if (direction == 0) {
-				if (this.status.moving == true) this.status.moving = false;
-				else {
-					direction = Math.PI;
-					this.status.moving = true;
-				}
-			}
-			else if (direction > 0) {
-				direction = (direction + Math.PI)/2;
-				this.status.moving = true;
+			if (this.keysDown.d) {
+				this.status.moving = false;
 			}
 			else {
-				direction = (direction - Math.PI)/2;
 				this.status.moving = true;
+				if (this.keysDown.w) {
+					direction = direction - Math.PI/4;
+				}
+				if (this.keysDown.s) {
+					direction = direction + Math.PI/4;
+				}	
+				if (!this.keysDown.w && !this.keysDown.s) {
+					direction = Math.PI;
+				}
 			}
 		}
 		if (this.status.moving) {
-			this.calculateDestination(direction, this.speed);
+			this.calculateDestination(direction);
 		}
 	}
 
 	controlSight() {
 		const actorRelativeToCameraX = this.x + this.ground.x;
 		const actorRelativeToCameraY = this.y + this.ground.y;
-		let angle = Math.atan((this.mouseCoords.y - actorRelativeToCameraY)/(this.mouseCoords.x - actorRelativeToCameraX));
-		if (this.mouseCoords.x < actorRelativeToCameraX) {
-			angle = Math.PI + angle;
-		} 
+		let angle = Math.atan2(this.mouseCoords.y - actorRelativeToCameraY, this.mouseCoords.x - actorRelativeToCameraX);
 		this.rotation = angle;
 	}
 
@@ -172,28 +189,27 @@ export default class Player extends Actor {
 	}
 
 	shoot() {
-		// let mainQuadrantIndex;
-		// if (this.currentQuadrants.length = 1) {
-		// 	mainQuadrantIndex = this.currentQuadrants[0];
-		// }
-		// else {
-		// 	for (let i = 0, quadrantsCount 	= this.currentQuadrants.length; i < quadrantsCount; i++) {
-		// 		let mainQuadrantFound = false;
-		// 		if (mainQuadrantFound) { break; };
-		// 		const currentQuadrantIndex = this.currentQuadrants[i];
-		// 		const quadrant = this.state.grid.quadrants[currentQuadrantIndex.xIndex][currentQuadrantIndex.yIndex];
-		// 		if (this.x <= quadrant.x2 &&
-		// 				this.x >= quadrant.x1 &&
-		// 				this.y <= quadrant.y2 &&
-		// 				this.y >= quadrant.y1) {
-		// 					mainQuadrantIndex = currentQuadrantIndex;
-		// 			mainQuadrantFound = true;
-		// 		}
-		// 	}
-		// }
-		// const playerFaceCenterX = this.x + this.hitBoxRadius * Math.cos(this.rotation);
-		// const playerFaceCenterY = this.y + this.hitBoxRadius * Math.sin(this.rotation);
-		// const bullet = new Projectile(this.bulletTexture, this.state, 'bullet', mainQuadrantIndex, playerFaceCenterX, playerFaceCenterY, this.rotation);
-		// this.ground.addChild(bullet);
+		let mainQuadrantIndex;
+		if (this.currentQuadrants.length = 1) {
+			mainQuadrantIndex = this.currentQuadrants[0];
+		}
+		else {
+			for (let i = 0, quadrantsCount 	= this.currentQuadrants.length; i < quadrantsCount; i++) {
+				let mainQuadrantFound = false;
+				if (mainQuadrantFound) { break; };
+				const currentQuadrantIndex = this.currentQuadrants[i];
+				const quadrant = this.state.grid.quadrants[currentQuadrantIndex.xIndex][currentQuadrantIndex.yIndex];
+				if (this.x <= quadrant.x2 &&
+						this.x >= quadrant.x1 &&
+						this.y <= quadrant.y2 &&
+						this.y >= quadrant.y1) {
+					mainQuadrantIndex = currentQuadrantIndex;
+					mainQuadrantFound = true;
+				}
+			}
+		}
+		//texture: PIXI.Texture, state: GameState, type: string, quadrantIndex: quadrantIndex, ground: PIXI.Container
+		const bullet = new Projectile(this.bulletTexture, this.state, 'projectile', mainQuadrantIndex, this.ground, this);
+		this.ground.addChild(bullet);
 	}
 }
