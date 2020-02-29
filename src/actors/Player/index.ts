@@ -1,5 +1,8 @@
+// eslint-disable-next-line no-unused-vars
 import Actor, { quadrantIndex } from '../Actor';
+// eslint-disable-next-line no-unused-vars
 import { interaction } from 'pixi.js';
+// eslint-disable-next-line no-unused-vars
 import GameState from '../../stateManagement/GameState';
 import Projectile from '../Projectile';
 
@@ -165,7 +168,7 @@ export default class Player extends Actor {
 		this.mouseCoords.y = event.data.getLocalPosition(this.camera).y;
 	}
 
-	handleMouseOut(event: interaction.InteractionEvent) {
+	handleMouseOut() {
 		this.state.pause = true;
 	}
 
@@ -189,27 +192,11 @@ export default class Player extends Actor {
 	}
 
 	shoot() {
-		let mainQuadrantIndex;
-		if (this.currentQuadrants.length = 1) {
-			mainQuadrantIndex = this.currentQuadrants[0];
-		}
-		else {
-			for (let i = 0, quadrantsCount 	= this.currentQuadrants.length; i < quadrantsCount; i++) {
-				let mainQuadrantFound = false;
-				if (mainQuadrantFound) { break; };
-				const currentQuadrantIndex = this.currentQuadrants[i];
-				const quadrant = this.state.grid.quadrants[currentQuadrantIndex.xIndex][currentQuadrantIndex.yIndex];
-				if (this.x <= quadrant.x2 &&
-						this.x >= quadrant.x1 &&
-						this.y <= quadrant.y2 &&
-						this.y >= quadrant.y1) {
-					mainQuadrantIndex = currentQuadrantIndex;
-					mainQuadrantFound = true;
-				}
-			}
-		}
-		//texture: PIXI.Texture, state: GameState, type: string, quadrantIndex: quadrantIndex, ground: PIXI.Container
-		const bullet = new Projectile(this.bulletTexture, this.state, 'projectile', mainQuadrantIndex, this.ground, this);
+		const shooterFaceCenterX = this.x + this.hitBoxRadius * Math.cos(this.rotation);
+		const shooterFaceCenterY = this.y + this.hitBoxRadius * Math.sin(this.rotation);
+		let bulletQuadrant = this.state.grid.getQuadrantByCoords(shooterFaceCenterX, shooterFaceCenterY);
+		console.log(bulletQuadrant);
+		const bullet = new Projectile(this.bulletTexture, this.state, 'projectile', bulletQuadrant, this.ground, this);
 		this.ground.addChild(bullet);
 	}
 }

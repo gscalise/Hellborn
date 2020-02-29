@@ -1,12 +1,14 @@
+// eslint-disable-next-line no-unused-vars
 import {Pair} from '../../physics/Grid';
+// eslint-disable-next-line no-unused-vars
 import Actor from '../../actors/Actor';
 
 export default class Collision {
 	static check(pair: Pair): void {
 		const firstActor = pair.firstActor;
 		const secondActor = pair.secondActor;
-		const distance = (secondActor.x - firstActor.x) * (secondActor.x - firstActor.x) + 
-			(secondActor.y - firstActor.y) * (secondActor.y - firstActor.y);
+		const distance = (secondActor.destination.x - firstActor.destination.x) * (secondActor.destination.x - firstActor.destination.x) + 
+			(secondActor.destination.y - firstActor.destination.y) * (secondActor.destination.y - firstActor.destination.y);
 		if (distance <= (secondActor.hitBoxRadius + firstActor.hitBoxRadius)*(secondActor.hitBoxRadius + firstActor.hitBoxRadius)) {	
 			this.collide(firstActor, secondActor);
 		}

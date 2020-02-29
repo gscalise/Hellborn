@@ -1,7 +1,9 @@
+// eslint-disable-next-line no-unused-vars
 import Actor, {quadrantIndex} from '../Actor';
+// eslint-disable-next-line no-unused-vars
 import Player from '../Player';
+// eslint-disable-next-line no-unused-vars
 import GameState from '../../stateManagement/GameState';
-import MathHelper from '../../helpers/MathHelper';
 
 export default class Enemy extends Actor {
 	constructor(ground: PIXI.Container, texture: PIXI.Texture, state: GameState, quadrantIndex: quadrantIndex) {

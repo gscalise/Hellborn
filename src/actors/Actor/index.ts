@@ -1,6 +1,8 @@
 import { Sprite, Point } from 'pixi.js';
+// eslint-disable-next-line no-unused-vars
 import GameState from '../../stateManagement/GameState';
-import MathHelper from '../../helpers/MathHelper';
+// eslint-disable-next-line no-unused-vars
+import { Quadrant } from '../../physics/Grid';
 
 interface Status {
 	moving: boolean;
@@ -21,7 +23,7 @@ export default class Actor extends Sprite {
 	speed: number;
 	state: GameState;
 	status: Status;
-	currentQuadrants: quadrantIndex[];
+	currentQuadrants: Quadrant[];
 	hitBoxRadius: number;
 	isObstacle: boolean;
 	destination: PIXI.Point;
@@ -41,11 +43,11 @@ export default class Actor extends Sprite {
 
 		this.hitBoxRadius = Math.floor(Math.sqrt(this.height/2*this.height/2 + this.width/2*this.width/2));
 		this.currentQuadrants = [];
-		this.currentQuadrants.push(quadrantIndex);
+		const quadrant = state.grid.quadrants[quadrantIndex.xIndex][quadrantIndex.yIndex];
+		this.currentQuadrants.push(quadrant);
 		let actorCenterX;
 		let actorCentery;
 
-		const quadrant = state.grid.quadrants[quadrantIndex.xIndex][quadrantIndex.yIndex];
 		actorCenterX = (quadrant.x1 + quadrant.x2)/2;	
 		actorCentery = (quadrant.y1 + quadrant.y2)/2;
 
@@ -68,10 +70,11 @@ export default class Actor extends Sprite {
 	move() {
 		this.x = this.destination.x;
 		this.y = this.destination.y;
-		this.state.moveActor(this);
+
 	}
 
 	calculateDestination(direction: number) {
+		// TODO: replace ground.height and ground.width with rectangle of ground's size
 		let x = this.x + this.speed * Math.cos(direction);
 		let y = this.y + this.speed * Math.sin(direction);
 		if (x <= 0) {
@@ -84,10 +87,11 @@ export default class Actor extends Sprite {
 			y = this.hitBoxRadius;
 		}
 		if (y >= this.ground.height) {
-			x = this.ground.height - this.hitBoxRadius;
+			y = this.ground.height - this.hitBoxRadius;
 		}
 		this.destination.x = x;
 		this.destination.y = y;
+		this.state.prepareToMoveActor(this);
 	}
 
 	reduceHealth(damage: number) {
@@ -95,6 +99,7 @@ export default class Actor extends Sprite {
 	}
 	prepare() {}
 	act(){}
+	// eslint-disable-next-line no-unused-vars
 	hit(actor: Actor){}
 	
 }

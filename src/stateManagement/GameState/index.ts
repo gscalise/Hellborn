@@ -1,4 +1,6 @@
+// eslint-disable-next-line no-unused-vars
 import Grid from '../../physics/Grid';
+// eslint-disable-next-line no-unused-vars
 import Actor from '../../actors/Actor';
 
 export interface Actors {
@@ -22,7 +24,7 @@ export default class GameState {
 
 		this.play = this.play.bind(this);
 	}
-	moveActor(actor: Actor) {
+	prepareToMoveActor(actor: Actor) {
 		this.grid.calculateNewQuadrants(actor);
 	}
 	addGrid(grid: Grid) {

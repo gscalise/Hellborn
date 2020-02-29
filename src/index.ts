@@ -17,12 +17,12 @@ const app = new PIXI.Application({
 
 const state = new GameState();
 
-let tick = 0;
+// let tick = 0;
 function gameLoop(delta: unknown, player: Player, enemy: Enemy, healthBar: HealthBar): void{
 	if (!state.pause) {
 		healthBar.monitor();
 		state.play();
-		tick++;
+		// tick++;
 	}
 	else {
 		// menu.manage();
@@ -38,7 +38,7 @@ app.loader.add('ground', 'assets/ground.png');
 app.loader.add('wall', 'assets/wall.png');
 app.loader.add('bullet', 'assets/bullet.png');
 
-app.loader.load((loader: unknown, resources: unknown) => {
+app.loader.load((/*loader: unknown, resources: unknown*/) => {
 	// initialize camera and ground
 	const groundSprite = PIXI.Sprite.from('ground');
 	groundSprite.zIndex = 0;
@@ -52,7 +52,7 @@ app.loader.load((loader: unknown, resources: unknown) => {
 	app.stage.addChild(camera);
 
 	// initialize grid for collisions
-	const grid = new Grid(ground, state);
+	new Grid(ground, state);
 
 	// initialize player and enemy
 	const player = new Player(app.screen, camera, ground, PIXI.Texture.from('player'), state, {xIndex: 4, yIndex: 5}, PIXI.Texture.from('bullet'));
