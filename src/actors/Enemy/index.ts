@@ -1,14 +1,17 @@
 // eslint-disable-next-line no-unused-vars
-import Actor, {quadrantIndex} from '../Actor';
-// eslint-disable-next-line no-unused-vars
-import Player from '../Player';
+import Actor from '../Actor';
 // eslint-disable-next-line no-unused-vars
 import GameState from '../../stateManagement/GameState';
+// eslint-disable-next-line no-unused-vars
+import {Quadrant} from '../../physics/Grid';
 
 export default class Enemy extends Actor {
-	constructor(ground: PIXI.Container, texture: PIXI.Texture, state: GameState, quadrantIndex: quadrantIndex) {
+	attackCooldown: number;
+	attackReach: number;
+
+	constructor(ground: PIXI.Container, texture: PIXI.Texture, state: GameState, quadrant: Quadrant) {
 		const type = 'enemy';
-		super(texture, state, type, quadrantIndex, ground);
+		super(texture, state, type, quadrant, ground);
 
 		this.attackReady = true;
 
@@ -18,49 +21,59 @@ export default class Enemy extends Actor {
 		this.speed = 3;
 		this.rotation = -(Math.PI/2);
 
+		this.hitBoxRadius = 28;
+		this.attackReach = 50;
 		this.strength = 80;
 		this.health = 80;
 		this.movable = true;
 
+		this.attackCooldown = 0;
 		this.attack = this.attack.bind(this);
 		this.act = this.act.bind(this);
 	}
 	
 	prepare() {
-		this.status.moving = true;
-		this.speed = 3;
-
-		const player = this.state.actors.player1;
-		// temporarily set as player1 cause there's no multiplayer yet
-		const playerX = player.x;
-		const playerY = player.y;
-		const verticalDistance = playerY - this.y;
-		const horizontalDistance = playerX - this.x;
-		let direction = Math.atan2(verticalDistance, horizontalDistance);
-		this.rotation = direction;
-
-		this.calculateDestination(direction);
-		
-		const quadDistance = verticalDistance*verticalDistance + horizontalDistance*horizontalDistance;
-		if (quadDistance <= this.hitBoxRadius*this.hitBoxRadius && this.attackReady) {
-			// this.attack(player);
+		if (this.health <= 0) {
+			this.die();
 		}
-		// if (this.health <= 0) {
-		// 	this.ground.removeChild(this);
-
-		// }
+		else {
+			if (this.attackCooldown > 0) {
+				this.attackCooldown = this.attackCooldown - this.state.ticker.elapsedMS;
+				if (this.attackCooldown <= 0) {
+					this.attackReady = true;
+				}
+			}
+			this.status.moving = true;
+			this.speed = 3;
+	
+			const player = this.state.actors.player1;
+			// temporarily set as player1 cause there's no multiplayer yet
+			const playerX = player.x;
+			const playerY = player.y;
+			const verticalDistance = playerY - this.y;
+			const horizontalDistance = playerX - this.x;
+			let direction = Math.atan2(verticalDistance, horizontalDistance);
+			this.rotation = direction;
+	
+			this.calculateDestination(direction);
+			
+			const quadDistance = verticalDistance*verticalDistance + horizontalDistance*horizontalDistance;
+			if (quadDistance <= this.attackReach*this.attackReach + player.hitBoxRadius*player.hitBoxRadius && this.attackReady) {
+				this.attack(player);
+			}
+		}
 	}
 
 	act(): void {
 		this.move();
 	}
 
-	attack(player: Player): void {
-		player.health = player.health - 10;
+	attack(player: Actor): void {
+		player.reduceHealth(10);
 		if (player.health <= 0) {
 			this.state.pause = true;
 		}
 		this.attackReady = false;
-		setTimeout(() => {this.attackReady = true;}, 1000);
+		this.attackCooldown = 1000;
 	}
 }

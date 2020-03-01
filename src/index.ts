@@ -1,11 +1,13 @@
 import * as PIXI from 'pixi.js';
 
 import Player from './actors/Player';
-import Enemy from './actors/Enemy';
-import Grid from './physics/Grid';
+// import Enemy from './actors/Enemy';
+// eslint-disable-next-line no-unused-vars
+import Grid, { Quadrant } from './physics/Grid';
 // import Menu from './interface/Menu.js';
 import HealthBar from './interface/HealthBar';
 import GameState from './stateManagement/GameState';
+import Spawner from './actors/Spawner';
 
 // initialize application
 const app = new PIXI.Application({
@@ -18,8 +20,9 @@ const app = new PIXI.Application({
 const state = new GameState();
 
 // let tick = 0;
-function gameLoop(delta: unknown, player: Player, enemy: Enemy, healthBar: HealthBar): void{
+function gameLoop(delta: unknown, player: Player, /*spawner: Spawner,*/ healthBar: HealthBar): void{
 	if (!state.pause) {
+		// console.log(delta);
 		healthBar.monitor();
 		state.play();
 		// tick++;
@@ -55,12 +58,19 @@ app.loader.load((/*loader: unknown, resources: unknown*/) => {
 	new Grid(ground, state);
 
 	// initialize player and enemy
-	const player = new Player(app.screen, camera, ground, PIXI.Texture.from('player'), state, {xIndex: 4, yIndex: 5}, PIXI.Texture.from('bullet'));
+	const playerQuadrant: Quadrant = state.grid.quadrants[4][5];
+	const player = new Player(app.screen, camera, ground, PIXI.Texture.from('player'), state, playerQuadrant, PIXI.Texture.from('bullet'));
 	ground.addChild(player);
-	const enemy = new Enemy(ground, PIXI.Texture.from('enemy'), state, {xIndex: 4, yIndex: 2});
-	ground.addChild(enemy);
-	// const anotherEnemy = new Enemy(ground, PIXI.Texture.from('enemy'), state, {xIndex: 5, yIndex: 7});
-	// ground.addChild(anotherEnemy);
+
+	const spawnerQuadrant1: Quadrant = state.grid.quadrants[4][2];
+	new Spawner(ground, PIXI.Texture.from('enemy'), state, spawnerQuadrant1);
+	const spawnerQuadrant2: Quadrant = state.grid.quadrants[7][2];
+	new Spawner(ground, PIXI.Texture.from('enemy'), state, spawnerQuadrant2);
+	const spawnerQuadrant3: Quadrant = state.grid.quadrants[7][8];
+	new Spawner(ground, PIXI.Texture.from('enemy'), state, spawnerQuadrant3);
+	// const enemy = new Enemy(ground, PIXI.Texture.from('enemy'), state, enemyQuadrant);
+	// ground.addChild(enemy);
+
 	// const wall = new Actor(PIXI.Texture.from('wall'), state, 'wall', {xIndex: 4, yIndex: 4});
 	// ground.addChild(wall);
 	
@@ -68,7 +78,7 @@ app.loader.load((/*loader: unknown, resources: unknown*/) => {
 	const graphics = new PIXI.Graphics();
 	const healthBar = new HealthBar(camera, graphics, state);
 	// const menu = new Menu();
-
-	app.ticker.add(delta => gameLoop(delta, player, enemy, healthBar));
+	state.ticker = app.ticker;
+	app.ticker.add(delta => gameLoop(delta, player, /*spawner,*/ healthBar));
 });
 

@@ -10,11 +10,6 @@ interface Status {
 	attacking: boolean;
 }
 
-export interface quadrantIndex {
-	xIndex: number;
-	yIndex: number
-}
-
 export default class Actor extends Sprite {
 	health: number;
 	type: string;
@@ -31,7 +26,7 @@ export default class Actor extends Sprite {
 	strength: number;
 	movable: boolean;
 
-	constructor(texture: PIXI.Texture, state: GameState, type: string, quadrantIndex: quadrantIndex, ground: PIXI.Container) {
+	constructor(texture: PIXI.Texture, state: GameState, type: string, quadrant: Quadrant, ground: PIXI.Container) {
 		super(texture);
 		this.state = state;
 		this.ground = ground;
@@ -40,10 +35,10 @@ export default class Actor extends Sprite {
 		if (type == 'enemy') this.id = this.type + (state.enemiesCount + 1);
 		if (type == 'player') this.id = this.type + (state.playersCount + 1);
 		if (type == 'projectile') this.id = this.type + (state.projectilesCount + 1);
+		if (type == 'spawner') this.id = this.type + (state.spawnerCount + 1);
 
-		this.hitBoxRadius = Math.floor(Math.sqrt(this.height/2*this.height/2 + this.width/2*this.width/2));
+		// this.hitBoxRadius = Math.floor(Math.sqrt(this.height/2*this.height/2 + this.width/2*this.width/2));
 		this.currentQuadrants = [];
-		const quadrant = state.grid.quadrants[quadrantIndex.xIndex][quadrantIndex.yIndex];
 		this.currentQuadrants.push(quadrant);
 		let actorCenterX;
 		let actorCentery;
@@ -102,4 +97,13 @@ export default class Actor extends Sprite {
 	// eslint-disable-next-line no-unused-vars
 	hit(actor: Actor){}
 	
+	die() {
+		this.speed = 0;
+		this.status.alive = false;
+		this.ground.removeChild(this);
+		for (let i = 0, quadrantCount = this.currentQuadrants.length; i < quadrantCount; i++) {
+			const quadrant = this.currentQuadrants[i];
+			quadrant.activeActors.splice(quadrant.activeActors.indexOf(this.id), 1);
+		}
+	}
 }

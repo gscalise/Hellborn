@@ -15,11 +15,11 @@ export default class Projectile extends Actor {
 		const shooterFaceCenterY = shooter.y + shooter.hitBoxRadius * Math.sin(shooter.rotation);
 		this.x = shooterFaceCenterX;
 		this.y = shooterFaceCenterY; 
-		this.speed = 10;
+		this.speed = 25;
 		this.status.moving = true;
 		this.direction = shooter.rotation;
 		this.movable = false;
-
+		this.hitBoxRadius = 3;
 		this.hit = this.hit.bind(this);
 	}
 	prepare() {
@@ -32,14 +32,6 @@ export default class Projectile extends Actor {
 
 	hit(actor: Actor) {
 		actor.reduceHealth(10);
-		// delete this.state.actors[this.id];
-		this.speed = 0;
-		this.status.alive = false;
-		this.ground.removeChild(this);
-
-		// this.currentQuadrants.forEach((quadrantIndex) => {
-		// 	const quadrant = this.state.grid.quadrants[quadrantIndex.xIndex][quadrantIndex.yIndex];
-		// 	this.state.grid.removeActorFromQuadrant(quadrant, this, quadrantIndex);
-		// });
+		this.die();
 	}
 }

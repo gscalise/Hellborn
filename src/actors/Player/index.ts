@@ -1,10 +1,12 @@
 // eslint-disable-next-line no-unused-vars
-import Actor, { quadrantIndex } from '../Actor';
+import Actor from '../Actor';
 // eslint-disable-next-line no-unused-vars
 import { interaction } from 'pixi.js';
 // eslint-disable-next-line no-unused-vars
 import GameState from '../../stateManagement/GameState';
 import Projectile from '../Projectile';
+// eslint-disable-next-line no-unused-vars
+import { Quadrant } from '../../physics/Grid';
 
 interface keysDown {
 	w: boolean;
@@ -25,15 +27,16 @@ export default class Player extends Actor {
 	camera: PIXI.Container;
 	bulletTexture: PIXI.Texture;
 
-	constructor(screen: PIXI.Rectangle, camera: PIXI.Container, ground: PIXI.Container, texture: PIXI.Texture, state: GameState, quadrantIndex: quadrantIndex, bulletTexture: PIXI.Texture) {
+	constructor(screen: PIXI.Rectangle, camera: PIXI.Container, ground: PIXI.Container, texture: PIXI.Texture, state: GameState, quadrant: Quadrant, bulletTexture: PIXI.Texture) {
 		const type = 'player';
-		super(texture, state, type, quadrantIndex, ground);
+		super(texture, state, type, quadrant, ground);
 
 		this.ground = ground;
 		this.screen = screen;
 		this.camera = camera;
 		this.bulletTexture = bulletTexture;
 
+		this.hitBoxRadius = 20;
 		this.zIndex = 1;
 		this.anchor.x = 0.5;
 		this.anchor.y = 0.5;

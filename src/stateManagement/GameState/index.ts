@@ -12,14 +12,17 @@ export default class GameState {
 	enemiesCount: number;
 	playersCount: number;
 	projectilesCount: number;
+	spawnerCount: number;
+
 	grid: Grid;
 	actors: Actors;
-
+	ticker: PIXI.Ticker;
 	constructor() {
 		this.pause = true;
 		this.enemiesCount = 0;
 		this.playersCount = 0;
 		this.projectilesCount = 0;
+		this.spawnerCount = 0;
 		this.actors = {};
 
 		this.play = this.play.bind(this);
@@ -43,6 +46,9 @@ export default class GameState {
 			case 'projectile':
 				this.projectilesCount = this.projectilesCount + 1;
 				break;
+			case 'spawner':
+				this.spawnerCount = this.spawnerCount + 1;
+				break;
 			}
 			const quadrantToAddActorTo = actor.currentQuadrants[0];
 			this.grid.quadrants[quadrantToAddActorTo.xIndex][quadrantToAddActorTo.yIndex].activeActors.push(actor.id);
@@ -59,7 +65,7 @@ export default class GameState {
 		this.grid.checkCollisions(this.actors);
 
 		for (let actorID in this.actors) {
-			if (this.actors[actorID].status.moving) {
+			if (this.actors[actorID].status.alive) {
 				this.actors[actorID].act();
 			}
 		}
