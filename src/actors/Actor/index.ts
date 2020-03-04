@@ -3,6 +3,8 @@ import { Sprite, Point } from 'pixi.js';
 import GameState from '../../stateManagement/GameState';
 // eslint-disable-next-line no-unused-vars
 import { Quadrant } from '../../physics/Grid';
+// eslint-disable-next-line no-unused-vars
+import Ground from '../../helpers/Ground';
 
 interface Status {
 	moving: boolean;
@@ -11,23 +13,27 @@ interface Status {
 }
 
 export default class Actor extends Sprite {
-	health: number;
-	type: string;
 	id: string;
-	attackReady: boolean;
-	speed: number;
-	state: GameState;
+	type: string;
+
+	health: number;
 	status: Status;
-	currentQuadrants: Quadrant[];
 	hitBoxRadius: number;
+	strength: number;
+
+	state: GameState;
+	ground: Ground;
+	attackReady: boolean;
+
+	speed: number;
+	currentQuadrants: Quadrant[];
 	isObstacle: boolean;
 	destination: PIXI.Point;
-	ground: PIXI.Container;
-	strength: number;
 	movable: boolean;
 
-	constructor(texture: PIXI.Texture, state: GameState, type: string, quadrant: Quadrant, ground: PIXI.Container) {
+	constructor(texture: PIXI.Texture, state: GameState, type: string, quadrant: Quadrant, ground: Ground) {
 		super(texture);
+		
 		this.state = state;
 		this.ground = ground;
 
@@ -42,15 +48,13 @@ export default class Actor extends Sprite {
 		this.currentQuadrants.push(quadrant);
 		let actorCenterX;
 		let actorCentery;
-
 		actorCenterX = (quadrant.x1 + quadrant.x2)/2;	
 		actorCentery = (quadrant.y1 + quadrant.y2)/2;
-
 		this.x = actorCenterX;
 		this.y = actorCentery;
 		this.destination = new Point(this.x, this.y);
 
-		this.status = {} as Status;
+		this.status = {} as Status;	
 		this.status.alive = true;
 		this.status.moving = false;
 		this.status.attacking = false;
@@ -69,20 +73,19 @@ export default class Actor extends Sprite {
 	}
 
 	calculateDestination(direction: number) {
-		// TODO: replace ground.height and ground.width with rectangle of ground's size
 		let x = this.x + this.speed * Math.cos(direction);
 		let y = this.y + this.speed * Math.sin(direction);
-		if (x <= 0) {
+		if (x - this.hitBoxRadius <= 0) {
 			x = this.hitBoxRadius;
 		}
-		if (x >= this.ground.width) {
-			x = this.ground.width - this.hitBoxRadius;
+		if (x + this.hitBoxRadius >= this.ground.fixedWidth) {
+			x = this.ground.fixedWidth - this.hitBoxRadius;
 		}
-		if (y <= 0) {
+		if (y - this.hitBoxRadius <= 0) {
 			y = this.hitBoxRadius;
 		}
-		if (y >= this.ground.height) {
-			y = this.ground.height - this.hitBoxRadius;
+		if (y + this.hitBoxRadius >= this.ground.fixedHeight) {
+			y = this.ground.fixedHeight - this.hitBoxRadius;
 		}
 		this.destination.x = x;
 		this.destination.y = y;

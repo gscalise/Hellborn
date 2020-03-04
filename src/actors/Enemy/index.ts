@@ -4,30 +4,34 @@ import Actor from '../Actor';
 import GameState from '../../stateManagement/GameState';
 // eslint-disable-next-line no-unused-vars
 import {Quadrant} from '../../physics/Grid';
+// eslint-disable-next-line no-unused-vars
+import Ground from '../../helpers/Ground';
 
 export default class Enemy extends Actor {
 	attackCooldown: number;
 	attackReach: number;
 
-	constructor(ground: PIXI.Container, texture: PIXI.Texture, state: GameState, quadrant: Quadrant) {
+	constructor(ground: Ground, texture: PIXI.Texture, state: GameState, quadrant: Quadrant) {
 		const type = 'enemy';
 		super(texture, state, type, quadrant, ground);
 
-		this.attackReady = true;
-
 		this.zIndex = 1;
+
 		this.anchor.x = 0.5;
 		this.anchor.y = 0.5;
-		this.speed = 3;
 		this.rotation = -(Math.PI/2);
-
+		
+		
+		this.attackCooldown = 0;
+		this.attackReady = true;
 		this.hitBoxRadius = 28;
 		this.attackReach = 50;
+
 		this.strength = 80;
 		this.health = 80;
+		this.speed = 3;
 		this.movable = true;
 
-		this.attackCooldown = 0;
 		this.attack = this.attack.bind(this);
 		this.act = this.act.bind(this);
 	}

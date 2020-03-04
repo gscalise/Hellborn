@@ -8,6 +8,7 @@ import Grid, { Quadrant } from './physics/Grid';
 import HealthBar from './interface/HealthBar';
 import GameState from './stateManagement/GameState';
 import Spawner from './actors/Spawner';
+import Ground from './helpers/Ground';
 
 // initialize application
 const app = new PIXI.Application({
@@ -23,8 +24,8 @@ const state = new GameState();
 function gameLoop(delta: unknown, player: Player, /*spawner: Spawner,*/ healthBar: HealthBar): void{
 	if (!state.pause) {
 		// console.log(delta);
-		healthBar.monitor();
 		state.play();
+		healthBar.monitor();
 		// tick++;
 	}
 	else {
@@ -40,12 +41,14 @@ app.loader.add('enemy', 'assets/enemy.png');
 app.loader.add('ground', 'assets/ground.png');
 app.loader.add('wall', 'assets/wall.png');
 app.loader.add('bullet', 'assets/bullet.png');
+app.loader.add('spawner', 'assets/spawner.png');
 
 app.loader.load((/*loader: unknown, resources: unknown*/) => {
 	// initialize camera and ground
 	const groundSprite = PIXI.Sprite.from('ground');
 	groundSprite.zIndex = 0;
-	const ground = new PIXI.Container();
+	const ground = new Ground();
+	
 	ground.addChild(groundSprite);
 	
 	const camera = new PIXI.Container();
@@ -63,11 +66,14 @@ app.loader.load((/*loader: unknown, resources: unknown*/) => {
 	ground.addChild(player);
 
 	const spawnerQuadrant1: Quadrant = state.grid.quadrants[4][2];
-	new Spawner(ground, PIXI.Texture.from('enemy'), state, spawnerQuadrant1);
+	const spawner1 = new Spawner(ground, PIXI.Texture.from('spawner'), state, spawnerQuadrant1);
+	ground.addChild(spawner1);
 	const spawnerQuadrant2: Quadrant = state.grid.quadrants[7][2];
-	new Spawner(ground, PIXI.Texture.from('enemy'), state, spawnerQuadrant2);
+	const spawner2 = new Spawner(ground, PIXI.Texture.from('spawner'), state, spawnerQuadrant2);
+	ground.addChild(spawner2);
 	const spawnerQuadrant3: Quadrant = state.grid.quadrants[7][8];
-	new Spawner(ground, PIXI.Texture.from('enemy'), state, spawnerQuadrant3);
+	const spawner3 = new Spawner(ground, PIXI.Texture.from('spawner'), state, spawnerQuadrant3);
+	ground.addChild(spawner3);
 	// const enemy = new Enemy(ground, PIXI.Texture.from('enemy'), state, enemyQuadrant);
 	// ground.addChild(enemy);
 

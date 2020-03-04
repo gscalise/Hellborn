@@ -5,12 +5,14 @@ import GameState from '../../stateManagement/GameState';
 // eslint-disable-next-line no-unused-vars
 import {Quadrant} from '../../physics/Grid';
 import Enemy from '../Enemy';
+// eslint-disable-next-line no-unused-vars
+import Ground from '../../helpers/Ground';
 
 export default class Spawner extends Actor {
 	spawnCooldown: number;
 	spawnTexture: PIXI.Texture;
 
-	constructor(ground: PIXI.Container, texture: PIXI.Texture, state: GameState, quadrant: Quadrant) {
+	constructor(ground: Ground, texture: PIXI.Texture, state: GameState, quadrant: Quadrant) {
 		const type = 'spawner';
 		super(texture, state, type, quadrant, ground);
 
@@ -29,7 +31,7 @@ export default class Spawner extends Actor {
 		if (this.spawnCooldown <= 0) {
 			const enemy = new Enemy(this.ground, this.spawnTexture, this.state, this.currentQuadrants[0]);
 			this.ground.addChild(enemy);	
-			this.spawnCooldown = 3000;
+			this.spawnCooldown = 4000;
 		}
 
 	}

@@ -50,6 +50,28 @@ export default class Grid {
 		state.addGrid(this);
 	}
 
+	getQuadrantByCoords(x: number, y: number) {
+		let quadrantFound = false;
+		let quadrant;
+		for (let i = 0, xDimenstionCount = this.quadrants.length; i < xDimenstionCount; i++) {
+			if (quadrantFound) { break; }
+			const xDimension = this.quadrants[i];
+			for (let j = 0, yDimensionCount = xDimension.length; j < yDimensionCount; j++) {
+				if (quadrantFound) { break; }
+				const currentQuadrant = xDimension[j];
+				if (x <= currentQuadrant.x2 &&
+						x >= currentQuadrant.x1 &&
+						y <= currentQuadrant.y2 &&
+						y >= currentQuadrant.y1) {
+					quadrantFound = true;
+					quadrant = xDimension[j];
+				}
+					
+			}
+		}
+		return quadrant;
+	}
+	
 	calculateNewQuadrants(actor: Actor) {
 		const actorRightBorder = actor.x + actor.hitBoxRadius;
 		const actorLeftBorder = actor.x - actor.hitBoxRadius;
@@ -196,27 +218,5 @@ export default class Grid {
 		});
 		if (pairIndexInArray > -1) isPairChecked = true;
 		return isPairChecked;
-	}
-
-	getQuadrantByCoords(x: number, y: number) {
-		let quadrantFound = false;
-		let quadrant;
-		for (let i = 0, xDimenstionCount = this.quadrants.length; i < xDimenstionCount; i++) {
-			if (quadrantFound) { break; }
-			const xDimension = this.quadrants[i];
-			for (let j = 0, yDimensionCount = xDimension.length; j < yDimensionCount; j++) {
-				if (quadrantFound) { break; }
-				const currentQuadrant = xDimension[j];
-				if (x <= currentQuadrant.x2 &&
-						x >= currentQuadrant.x1 &&
-						y <= currentQuadrant.y2 &&
-						y >= currentQuadrant.y1) {
-					quadrantFound = true;
-					quadrant = xDimension[j];
-				}
-					
-			}
-		}
-		return quadrant;
 	}
 } 

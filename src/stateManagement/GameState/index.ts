@@ -56,7 +56,7 @@ export default class GameState {
 	}
 
 	play() {
-		console.log(this);
+		// console.log(this);
 		for (let actorID in this.actors) {
 			if (this.actors[actorID].status.alive) {
 				this.actors[actorID].prepare();

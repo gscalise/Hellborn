@@ -7,6 +7,8 @@ import GameState from '../../stateManagement/GameState';
 import Projectile from '../Projectile';
 // eslint-disable-next-line no-unused-vars
 import { Quadrant } from '../../physics/Grid';
+// eslint-disable-next-line no-unused-vars
+import Ground from '../../helpers/Ground';
 
 interface keysDown {
 	w: boolean;
@@ -15,19 +17,22 @@ interface keysDown {
 	a: boolean;
 }
 
-interface mouseCoords {
+interface mouse {
 	x: number;
 	y: number;
+	pressed: boolean;
 }
 
 export default class Player extends Actor {
 	keysDown: keysDown;
-	mouseCoords: mouseCoords;
+	mouse: mouse;
 	screen: PIXI.Rectangle;
 	camera: PIXI.Container;
 	bulletTexture: PIXI.Texture;
+	weaponReady: boolean;
+	reloadTime: number;
 
-	constructor(screen: PIXI.Rectangle, camera: PIXI.Container, ground: PIXI.Container, texture: PIXI.Texture, state: GameState, quadrant: Quadrant, bulletTexture: PIXI.Texture) {
+	constructor(screen: PIXI.Rectangle, camera: PIXI.Container, ground: Ground, texture: PIXI.Texture, state: GameState, quadrant: Quadrant, bulletTexture: PIXI.Texture) {
 		const type = 'player';
 		super(texture, state, type, quadrant, ground);
 
@@ -49,6 +54,9 @@ export default class Player extends Actor {
 
 		this.health = 100;
 
+		this.weaponReady = true;
+		this.reloadTime = 0;
+
 		this.strength = 90;
 		this.movable = true;
 
@@ -58,7 +66,8 @@ export default class Player extends Actor {
 		window.onresize = this.centerCamera.bind(this);
 		camera.on('mousemove', this.handleMouseMove.bind(this));
 		camera.on('mouseout', this.handleMouseOut.bind(this));
-		camera.on('click', this.shoot.bind(this));
+		camera.on('mousedown', this.handleMouseDown.bind(this));
+		camera.on('mouseup', this.handleMouseUp.bind(this));
 
 		this.keysDown = {
 			w: false,
@@ -67,9 +76,10 @@ export default class Player extends Actor {
 			a: false
 		};
 
-		this.mouseCoords = {
+		this.mouse = {
 			x: 500,
-			y: 500
+			y: 500,
+			pressed: false
 		};
 
 		this.act = this.act.bind(this);
@@ -85,6 +95,8 @@ export default class Player extends Actor {
 	act() {
 		this.move();
 		this.centerCamera();
+		this.reload();
+		this.shoot();
 	}
 
 	controlMovement() {
@@ -141,7 +153,7 @@ export default class Player extends Actor {
 	controlSight() {
 		const actorRelativeToCameraX = this.x + this.ground.x;
 		const actorRelativeToCameraY = this.y + this.ground.y;
-		let angle = Math.atan2(this.mouseCoords.y - actorRelativeToCameraY, this.mouseCoords.x - actorRelativeToCameraX);
+		let angle = Math.atan2(this.mouse.y - actorRelativeToCameraY, this.mouse.x - actorRelativeToCameraX);
 		this.rotation = angle;
 	}
 
@@ -167,12 +179,20 @@ export default class Player extends Actor {
 	}
 
 	handleMouseMove(event: interaction.InteractionEvent) {
-		this.mouseCoords.x = event.data.getLocalPosition(this.camera).x;
-		this.mouseCoords.y = event.data.getLocalPosition(this.camera).y;
+		this.mouse.x = event.data.getLocalPosition(this.camera).x;
+		this.mouse.y = event.data.getLocalPosition(this.camera).y;
 	}
 
 	handleMouseOut() {
 		this.state.pause = true;
+	}
+
+	handleMouseDown() {
+		this.mouse.pressed = true;
+	}
+
+	handleMouseUp() {
+		this.mouse.pressed = false;
 	}
 
 	centerCamera() {
@@ -181,25 +201,37 @@ export default class Player extends Actor {
 		if (this.x - this.screen.width/2 <= 0) {
 			x = 0;
 		}
-		if (this.x + this.screen.width/2 >= this.ground.width) {
-			x = this.ground.width - this.screen.width;
+		if (this.x + this.screen.width/2 >= this.ground.fixedWidth) {
+			x = this.ground.fixedWidth - this.screen.width;
 		}
 		if (this.y - this.screen.height/2 <= 0) {
 			y = 0;
 		}
-		if (this.y + this.screen.height/2 >= this.ground.height) {
-			y = this.ground.height - this.screen.height;
+		if (this.y + this.screen.height/2 >= this.ground.fixedHeight) {
+			y = this.ground.fixedHeight - this.screen.height;
 		}
 		this.ground.x = -x;
 		this.ground.y = -y;
 	}
 
 	shoot() {
-		const shooterFaceCenterX = this.x + this.hitBoxRadius * Math.cos(this.rotation);
-		const shooterFaceCenterY = this.y + this.hitBoxRadius * Math.sin(this.rotation);
-		let bulletQuadrant = this.state.grid.getQuadrantByCoords(shooterFaceCenterX, shooterFaceCenterY);
-		console.log(bulletQuadrant);
-		const bullet = new Projectile(this.bulletTexture, this.state, 'projectile', bulletQuadrant, this.ground, this);
-		this.ground.addChild(bullet);
+		if (this.weaponReady && this.mouse.pressed) {
+			const shooterFaceCenterX = this.x + this.hitBoxRadius * Math.cos(this.rotation);
+			const shooterFaceCenterY = this.y + this.hitBoxRadius * Math.sin(this.rotation);
+			let bulletQuadrant = this.state.grid.getQuadrantByCoords(shooterFaceCenterX, shooterFaceCenterY);
+			const bullet = new Projectile(this.bulletTexture, this.state, 'projectile', bulletQuadrant, this.ground, this);
+			this.ground.addChild(bullet);
+			this.weaponReady = false;
+			this.reloadTime = 50;
+		}
+	}
+
+	reload() {
+		if (this.reloadTime >= 0) {
+			this.reloadTime = this.reloadTime - this.state.ticker.elapsedMS;
+		}
+		else {
+			this.weaponReady = true;
+		}
 	}
 }

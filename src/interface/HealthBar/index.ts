@@ -1,4 +1,5 @@
-import GameState from "../../stateManagement/GameState";
+// eslint-disable-next-line no-unused-vars
+import GameState from '../../stateManagement/GameState';
 
 export default class HealthBar {
 	graphics: PIXI.Graphics;
