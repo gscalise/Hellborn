@@ -16,7 +16,9 @@ export default class Actor extends Sprite {
 	id: string;
 	type: string;
 
-	health: number;
+	maxHealth: number;
+	currentHealth: number;
+
 	status: Status;
 	hitBoxRadius: number;
 	strength: number;
@@ -93,7 +95,7 @@ export default class Actor extends Sprite {
 	}
 
 	reduceHealth(damage: number) {
-		this.health = this.health - damage;
+		this.currentHealth = this.currentHealth - damage;
 	}
 	prepare() {}
 	act(){}

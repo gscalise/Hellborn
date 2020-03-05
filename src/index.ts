@@ -66,14 +66,11 @@ app.loader.load((/*loader: unknown, resources: unknown*/) => {
 	ground.addChild(player);
 
 	const spawnerQuadrant1: Quadrant = state.grid.quadrants[4][2];
-	const spawner1 = new Spawner(ground, PIXI.Texture.from('spawner'), state, spawnerQuadrant1);
-	ground.addChild(spawner1);
+	new Spawner(ground, PIXI.Texture.from('enemy'), state, spawnerQuadrant1);
 	const spawnerQuadrant2: Quadrant = state.grid.quadrants[7][2];
-	const spawner2 = new Spawner(ground, PIXI.Texture.from('spawner'), state, spawnerQuadrant2);
-	ground.addChild(spawner2);
+	new Spawner(ground, PIXI.Texture.from('enemy'), state, spawnerQuadrant2);
 	const spawnerQuadrant3: Quadrant = state.grid.quadrants[7][8];
-	const spawner3 = new Spawner(ground, PIXI.Texture.from('spawner'), state, spawnerQuadrant3);
-	ground.addChild(spawner3);
+	new Spawner(ground, PIXI.Texture.from('enemy'), state, spawnerQuadrant3);
 	// const enemy = new Enemy(ground, PIXI.Texture.from('enemy'), state, enemyQuadrant);
 	// ground.addChild(enemy);
 

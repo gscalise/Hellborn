@@ -28,7 +28,8 @@ export default class Enemy extends Actor {
 		this.attackReach = 50;
 
 		this.strength = 80;
-		this.health = 80;
+		this.maxHealth = 80;
+		this.currentHealth = this.maxHealth;
 		this.speed = 3;
 		this.movable = true;
 
@@ -37,7 +38,7 @@ export default class Enemy extends Actor {
 	}
 	
 	prepare() {
-		if (this.health <= 0) {
+		if (this.currentHealth <= 0) {
 			this.die();
 		}
 		else {
@@ -74,7 +75,7 @@ export default class Enemy extends Actor {
 
 	attack(player: Actor): void {
 		player.reduceHealth(10);
-		if (player.health <= 0) {
+		if (player.currentHealth <= 0) {
 			this.state.pause = true;
 		}
 		this.attackReady = false;

@@ -15,6 +15,7 @@ interface keysDown {
 	d: boolean;
 	s: boolean;
 	a: boolean;
+	shift: boolean;
 }
 
 interface mouse {
@@ -31,6 +32,8 @@ export default class Player extends Actor {
 	bulletTexture: PIXI.Texture;
 	weaponReady: boolean;
 	reloadTime: number;
+	maxStamina: number;
+	currentStamina: number;
 
 	constructor(screen: PIXI.Rectangle, camera: PIXI.Container, ground: Ground, texture: PIXI.Texture, state: GameState, quadrant: Quadrant, bulletTexture: PIXI.Texture) {
 		const type = 'player';
@@ -52,7 +55,11 @@ export default class Player extends Actor {
 		this.rotation = -(3*Math.PI/2);
 		this.interactive = true;
 
-		this.health = 100;
+		this.maxHealth = 100;
+		this.currentHealth = this.maxHealth;
+
+		this.maxStamina = 100;
+		this.currentStamina = this.maxStamina;
 
 		this.weaponReady = true;
 		this.reloadTime = 0;
@@ -73,7 +80,8 @@ export default class Player extends Actor {
 			w: false,
 			d: false,
 			s: false,
-			a: false
+			a: false,
+			shift: false
 		};
 
 		this.mouse = {
@@ -102,6 +110,13 @@ export default class Player extends Actor {
 	controlMovement() {
 		let direction = 0;
 		this.speed = 4;
+		if (this.keysDown.shift && this.currentStamina > 0) {
+			this.speed = 8;
+			this.currentStamina = this.currentStamina - 1;
+		}
+		if (this.currentStamina < this.maxStamina) {
+			this.currentStamina = this.currentStamina + 0.1;
+		}
 		this.status.moving = false;
 		if (this.keysDown.w) {
 			this.status.moving = true;
@@ -162,6 +177,7 @@ export default class Player extends Actor {
 		if (event.code === 'KeyD') this.keysDown.d = true;
 		if (event.code === 'KeyS') this.keysDown.s = true;
 		if (event.code === 'KeyA') this.keysDown.a = true;
+		if (event.shiftKey) this.keysDown.shift = true;
 	}
 
 	handleKeyUp(event: KeyboardEvent) {
@@ -169,6 +185,7 @@ export default class Player extends Actor {
 		if (event.code === 'KeyD') this.keysDown.d = false;
 		if (event.code === 'KeyS') this.keysDown.s = false;
 		if (event.code === 'KeyA') this.keysDown.a = false;
+		if (!event.shiftKey) this.keysDown.shift = false;
 	}
 
 	handleKeyPress(event: KeyboardEvent) {
