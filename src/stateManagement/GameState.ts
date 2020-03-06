@@ -1,7 +1,7 @@
 // eslint-disable-next-line no-unused-vars
-import Grid from '../../physics/Grid';
+import Grid from '../physics/Grid';
 // eslint-disable-next-line no-unused-vars
-import Actor from '../../actors/Actor';
+import Actor from '../actors/Actor';
 
 export interface Actors {
 	[id: string]: Actor;

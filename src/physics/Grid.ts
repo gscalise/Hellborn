@@ -1,8 +1,8 @@
 // eslint-disable-next-line no-unused-vars
-import GameState, { Actors } from '../../stateManagement/GameState';
+import GameState, { Actors } from '../stateManagement/GameState';
 // eslint-disable-next-line no-unused-vars
-import Actor from '../../actors/Actor';
-import Collision from '../../physics/Collision';
+import Actor from '../actors/Actor';
+import Collision from './Collision';
 
 export interface Quadrant {
 	xIndex: number;

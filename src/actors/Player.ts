@@ -1,14 +1,15 @@
 // eslint-disable-next-line no-unused-vars
-import Actor from '../Actor';
+import Actor from './Actor';
 // eslint-disable-next-line no-unused-vars
 import { interaction } from 'pixi.js';
 // eslint-disable-next-line no-unused-vars
-import GameState from '../../stateManagement/GameState';
-import Projectile from '../Projectile';
+import GameState from '../stateManagement/GameState';
+import Projectile from './Projectile';
 // eslint-disable-next-line no-unused-vars
-import { Quadrant } from '../../physics/Grid';
+import { Quadrant } from '../physics/Grid';
 // eslint-disable-next-line no-unused-vars
-import Ground from '../../helpers/Ground';
+import Ground from '../helpers/Ground';
+import {Sprite} from 'pixi.js';
 
 interface keysDown {
 	w: boolean;
@@ -34,6 +35,7 @@ export default class Player extends Actor {
 	reloadTime: number;
 	maxStamina: number;
 	currentStamina: number;
+	sprite: Sprite;
 
 	constructor(screen: PIXI.Rectangle, camera: PIXI.Container, ground: Ground, texture: PIXI.Texture, state: GameState, quadrant: Quadrant, bulletTexture: PIXI.Texture) {
 		const type = 'player';
@@ -46,8 +48,11 @@ export default class Player extends Actor {
 
 		this.hitBoxRadius = 20;
 		this.zIndex = 1;
-		this.anchor.x = 0.5;
-		this.anchor.y = 0.5;
+		this.sprite = new Sprite(texture);
+		this.sprite.anchor.x = 0.5;
+		this.sprite.anchor.y = 0.5;
+		this.addChild(this.sprite);
+		this.rotation = -(Math.PI/2);
 
 		this.centerCamera();
 

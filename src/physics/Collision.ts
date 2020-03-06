@@ -1,7 +1,7 @@
 // eslint-disable-next-line no-unused-vars
-import {Pair} from '../../physics/Grid';
+import {Pair} from './Grid';
 // eslint-disable-next-line no-unused-vars
-import Actor from '../../actors/Actor';
+import Actor from '../actors/Actor';
 
 export default class Collision {
 	static check(pair: Pair): void {

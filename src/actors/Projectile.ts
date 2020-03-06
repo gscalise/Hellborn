@@ -1,19 +1,23 @@
 // eslint-disable-next-line no-unused-vars
-import Actor from '../Actor';
+import Actor from './Actor';
 // eslint-disable-next-line no-unused-vars
-import GameState from '../../stateManagement/GameState';
+import GameState from '../stateManagement/GameState';
 // eslint-disable-next-line no-unused-vars
-import { Quadrant } from '../../physics/Grid';
+import { Quadrant } from '../physics/Grid';
 // eslint-disable-next-line no-unused-vars
-import Ground from '../../helpers/Ground';
+import Ground from '../helpers/Ground';
+import {Sprite} from 'pixi.js';
 
 export default class Projectile extends Actor {
 	direction: number;
 	lifespan: number;
+	sprite: Sprite;
 
 	constructor(texture: PIXI.Texture, state: GameState, type: string, quadrant: Quadrant, ground: Ground, shooter: Actor) {
 		super(texture, state, type, quadrant, ground);
 		this.type = 'projectile';
+		this.sprite = new Sprite(texture);
+		this.addChild(this.sprite);
 		const shooterFaceCenterX = shooter.x + shooter.hitBoxRadius * Math.cos(shooter.rotation);
 		const shooterFaceCenterY = shooter.y + shooter.hitBoxRadius * Math.sin(shooter.rotation);
 		this.x = shooterFaceCenterX;

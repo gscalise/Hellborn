@@ -5,7 +5,7 @@ import Player from './actors/Player';
 // eslint-disable-next-line no-unused-vars
 import Grid, { Quadrant } from './physics/Grid';
 // import Menu from './interface/Menu.js';
-import HealthBar from './interface/HealthBar';
+import HealthBar from './interface/HUD';
 import GameState from './stateManagement/GameState';
 import Spawner from './actors/Spawner';
 import Ground from './helpers/Ground';
@@ -36,12 +36,12 @@ function gameLoop(delta: unknown, player: Player, /*spawner: Spawner,*/ healthBa
 document.body.appendChild(app.view);
 
 // load sprites
-app.loader.add('player', 'assets/player.png');
-app.loader.add('enemy', 'assets/enemy.png');
-app.loader.add('ground', 'assets/ground.png');
-app.loader.add('wall', 'assets/wall.png');
-app.loader.add('bullet', 'assets/bullet.png');
-app.loader.add('spawner', 'assets/spawner.png');
+app.loader.add('player', 'assets/sprites/player.png');
+app.loader.add('enemy', 'assets/sprites/enemy.png');
+app.loader.add('ground', 'assets/sprites/ground.png');
+app.loader.add('wall', 'assets/sprites/wall.png');
+app.loader.add('bullet', 'assets/sprites/bullet.png');
+app.loader.add('spawner', 'assets/sprites/spawner.png');
 
 app.loader.load((/*loader: unknown, resources: unknown*/) => {
 	// initialize camera and ground

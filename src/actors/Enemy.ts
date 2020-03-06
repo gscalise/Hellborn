@@ -1,26 +1,28 @@
 // eslint-disable-next-line no-unused-vars
-import Actor from '../Actor';
+import Actor from './Actor';
 // eslint-disable-next-line no-unused-vars
-import GameState from '../../stateManagement/GameState';
+import GameState from '../stateManagement/GameState';
 // eslint-disable-next-line no-unused-vars
-import {Quadrant} from '../../physics/Grid';
+import {Quadrant} from '../physics/Grid';
 // eslint-disable-next-line no-unused-vars
-import Ground from '../../helpers/Ground';
+import Ground from '../helpers/Ground';
+import {Sprite} from 'pixi.js';
 
 export default class Enemy extends Actor {
 	attackCooldown: number;
 	attackReach: number;
+	sprite: Sprite;
 
 	constructor(ground: Ground, texture: PIXI.Texture, state: GameState, quadrant: Quadrant) {
 		const type = 'enemy';
 		super(texture, state, type, quadrant, ground);
 
 		this.zIndex = 1;
-
-		this.anchor.x = 0.5;
-		this.anchor.y = 0.5;
+		this.sprite = new Sprite(texture);
+		this.sprite.anchor.x = 0.5;
+		this.sprite.anchor.y = 0.5;
+		this.addChild(this.sprite);
 		this.rotation = -(Math.PI/2);
-		
 		
 		this.attackCooldown = 0;
 		this.attackReady = true;

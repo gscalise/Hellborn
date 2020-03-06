@@ -1,10 +1,11 @@
-import { Sprite, Point } from 'pixi.js';
 // eslint-disable-next-line no-unused-vars
-import GameState from '../../stateManagement/GameState';
+import { Point, Container } from 'pixi.js';
 // eslint-disable-next-line no-unused-vars
-import { Quadrant } from '../../physics/Grid';
+import GameState from '../stateManagement/GameState';
 // eslint-disable-next-line no-unused-vars
-import Ground from '../../helpers/Ground';
+import { Quadrant } from '../physics/Grid';
+// eslint-disable-next-line no-unused-vars
+import Ground from '../helpers/Ground';
 
 interface Status {
 	moving: boolean;
@@ -12,7 +13,7 @@ interface Status {
 	attacking: boolean;
 }
 
-export default class Actor extends Sprite {
+export default class Actor extends Container {
 	id: string;
 	type: string;
 
@@ -34,7 +35,7 @@ export default class Actor extends Sprite {
 	movable: boolean;
 
 	constructor(texture: PIXI.Texture, state: GameState, type: string, quadrant: Quadrant, ground: Ground) {
-		super(texture);
+		super();
 		
 		this.state = state;
 		this.ground = ground;

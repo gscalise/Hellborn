@@ -1,12 +1,12 @@
 // eslint-disable-next-line no-unused-vars
-import Actor from '../Actor';
+import Actor from './Actor';
 // eslint-disable-next-line no-unused-vars
-import GameState from '../../stateManagement/GameState';
+import GameState from '../stateManagement/GameState';
 // eslint-disable-next-line no-unused-vars
-import {Quadrant} from '../../physics/Grid';
-import Enemy from '../Enemy';
+import {Quadrant} from '../physics/Grid';
+import Enemy from './Enemy';
 // eslint-disable-next-line no-unused-vars
-import Ground from '../../helpers/Ground';
+import Ground from '../helpers/Ground';
 
 export default class Spawner extends Actor {
 	spawnCooldown: number;
