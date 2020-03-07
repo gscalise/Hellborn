@@ -1,21 +1,21 @@
 // eslint-disable-next-line no-unused-vars
-import GameState from '../stateManagement/GameState';
+import Game from '../stateManagement/Game';
 // eslint-disable-next-line no-unused-vars
 import Player from '../actors/Player';
 
-export default class HealthBar {
+export default class HUD {
 	graphics: PIXI.Graphics;
-	state: GameState;
+	state: Game;
 
-	constructor(stage: PIXI.Container, graphics: PIXI.Graphics, state: GameState) {
+	constructor(stage: PIXI.Container, graphics: PIXI.Graphics, state: Game) {
 		this.graphics = graphics;
 		this.state = state;
 		stage.addChild(this.graphics);
 
-		this.monitor = this.monitor.bind(this);
+		this.render = this.render.bind(this);
 	}
 
-	monitor() {
+	render() {
 		const player = this.state.actors.player1 as Player;
 		this.graphics.clear();
 		this.graphics.beginFill(0x432828);

@@ -3,13 +3,13 @@ import Actor from './Actor';
 // eslint-disable-next-line no-unused-vars
 import { interaction } from 'pixi.js';
 // eslint-disable-next-line no-unused-vars
-import GameState from '../stateManagement/GameState';
+import Game from '../stateManagement/Game';
 import Projectile from './Projectile';
 // eslint-disable-next-line no-unused-vars
 import { Quadrant } from '../physics/Grid';
 // eslint-disable-next-line no-unused-vars
 import Ground from '../helpers/Ground';
-import {Sprite} from 'pixi.js';
+import {AnimatedSprite} from 'pixi.js';
 
 interface keysDown {
 	w: boolean;
@@ -35,11 +35,11 @@ export default class Player extends Actor {
 	reloadTime: number;
 	maxStamina: number;
 	currentStamina: number;
-	sprite: Sprite;
+	sprite: AnimatedSprite;
 
-	constructor(screen: PIXI.Rectangle, camera: PIXI.Container, ground: Ground, texture: PIXI.Texture, state: GameState, quadrant: Quadrant, bulletTexture: PIXI.Texture) {
+	constructor(screen: PIXI.Rectangle, camera: PIXI.Container, ground: Ground, texture: PIXI.Texture[], state: Game, quadrant: Quadrant, bulletTexture: PIXI.Texture) {
 		const type = 'player';
-		super(texture, state, type, quadrant, ground);
+		super(state, type, quadrant, ground);
 
 		this.ground = ground;
 		this.screen = screen;
@@ -48,9 +48,10 @@ export default class Player extends Actor {
 
 		this.hitBoxRadius = 20;
 		this.zIndex = 1;
-		this.sprite = new Sprite(texture);
+		this.sprite = new AnimatedSprite(texture);
 		this.sprite.anchor.x = 0.5;
 		this.sprite.anchor.y = 0.5;
+		this.sprite.animationSpeed = 0.1;
 		this.addChild(this.sprite);
 		this.rotation = -(Math.PI/2);
 
@@ -166,7 +167,11 @@ export default class Player extends Actor {
 			}
 		}
 		if (this.status.moving) {
+			this.sprite.play();
 			this.calculateDestination(direction);
+		}
+		else {
+			this.sprite.gotoAndStop(0);
 		}
 	}
 
@@ -244,7 +249,7 @@ export default class Player extends Actor {
 			const bullet = new Projectile(this.bulletTexture, this.state, 'projectile', bulletQuadrant, this.ground, this);
 			this.ground.addChild(bullet);
 			this.weaponReady = false;
-			this.reloadTime = 50;
+			this.reloadTime = 2000;
 		}
 	}
 

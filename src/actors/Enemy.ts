@@ -1,7 +1,7 @@
 // eslint-disable-next-line no-unused-vars
 import Actor from './Actor';
 // eslint-disable-next-line no-unused-vars
-import GameState from '../stateManagement/GameState';
+import Game from '../stateManagement/Game';
 // eslint-disable-next-line no-unused-vars
 import {Quadrant} from '../physics/Grid';
 // eslint-disable-next-line no-unused-vars
@@ -13,9 +13,9 @@ export default class Enemy extends Actor {
 	attackReach: number;
 	sprite: Sprite;
 
-	constructor(ground: Ground, texture: PIXI.Texture, state: GameState, quadrant: Quadrant) {
+	constructor(ground: Ground, texture: PIXI.Texture, state: Game, quadrant: Quadrant) {
 		const type = 'enemy';
-		super(texture, state, type, quadrant, ground);
+		super(state, type, quadrant, ground);
 
 		this.zIndex = 1;
 		this.sprite = new Sprite(texture);

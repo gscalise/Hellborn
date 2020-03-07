@@ -1,5 +1,5 @@
 // eslint-disable-next-line no-unused-vars
-import GameState, { Actors } from '../stateManagement/GameState';
+import Game, { Actors } from '../stateManagement/Game';
 // eslint-disable-next-line no-unused-vars
 import Actor from '../actors/Actor';
 import Collision from './Collision';
@@ -24,7 +24,7 @@ export default class Grid {
 	quadrants: Quadrant[][];
 	horizontalCount: number;
 	verticalCount: number;
-	constructor(ground: PIXI.Container, state: GameState) {
+	constructor(ground: PIXI.Container, game: Game) {
 		this.id = 'grid';
 		this.quadrants = new Array<Array<Quadrant>>();
 		this.horizontalCount = 10;
@@ -47,7 +47,7 @@ export default class Grid {
 				};
 			}
 		}
-		state.addGrid(this);
+		game.addGrid(this);
 	}
 
 	getQuadrantByCoords(x: number, y: number) {

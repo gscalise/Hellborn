@@ -1,7 +1,7 @@
 // eslint-disable-next-line no-unused-vars
 import Actor from './Actor';
 // eslint-disable-next-line no-unused-vars
-import GameState from '../stateManagement/GameState';
+import Game from '../stateManagement/Game';
 // eslint-disable-next-line no-unused-vars
 import {Quadrant} from '../physics/Grid';
 import Enemy from './Enemy';
@@ -12,9 +12,9 @@ export default class Spawner extends Actor {
 	spawnCooldown: number;
 	spawnTexture: PIXI.Texture;
 
-	constructor(ground: Ground, texture: PIXI.Texture, state: GameState, quadrant: Quadrant) {
+	constructor(ground: Ground, texture: PIXI.Texture, state: Game, quadrant: Quadrant) {
 		const type = 'spawner';
-		super(texture, state, type, quadrant, ground);
+		super(state, type, quadrant, ground);
 
 		this.spawnTexture = texture;
 		this.spawnCooldown = 0;

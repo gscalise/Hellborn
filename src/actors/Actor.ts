@@ -1,7 +1,7 @@
 // eslint-disable-next-line no-unused-vars
 import { Point, Container } from 'pixi.js';
 // eslint-disable-next-line no-unused-vars
-import GameState from '../stateManagement/GameState';
+import Game from '../stateManagement/Game';
 // eslint-disable-next-line no-unused-vars
 import { Quadrant } from '../physics/Grid';
 // eslint-disable-next-line no-unused-vars
@@ -24,7 +24,7 @@ export default class Actor extends Container {
 	hitBoxRadius: number;
 	strength: number;
 
-	state: GameState;
+	state: Game;
 	ground: Ground;
 	attackReady: boolean;
 
@@ -34,7 +34,7 @@ export default class Actor extends Container {
 	destination: PIXI.Point;
 	movable: boolean;
 
-	constructor(texture: PIXI.Texture, state: GameState, type: string, quadrant: Quadrant, ground: Ground) {
+	constructor(state: Game, type: string, quadrant: Quadrant, ground: Ground) {
 		super();
 		
 		this.state = state;
