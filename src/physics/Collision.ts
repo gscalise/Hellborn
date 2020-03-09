@@ -3,6 +3,9 @@ import {Pair} from './Grid';
 // eslint-disable-next-line no-unused-vars
 import Actor from '../actors/Actor';
 
+// Since there's no state in collision detection and all your functions are static, why don't you just export the functions?
+// If you want to keep them like this so you can call these functions with Collision.check(..) / Collision.collide(...)
+// you can export a namespace.
 export default class Collision {
 	static check(pair: Pair): void {
 		const firstActor = pair.firstActor;
