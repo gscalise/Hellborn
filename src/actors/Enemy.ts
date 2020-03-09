@@ -78,7 +78,7 @@ export default class Enemy extends Actor {
 	attack(player: Actor): void {
 		player.reduceHealth(10);
 		if (player.currentHealth <= 0) {
-			this.state.pause = true;
+			this.state.pause();
 		}
 		this.attackReady = false;
 		this.attackCooldown = 1000;

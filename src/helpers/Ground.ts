@@ -7,5 +7,6 @@ export default class Ground extends PIXI.Container {
 		super();
 		this.fixedWidth = 3500;
 		this.fixedHeight = 2000;
+		this.zIndex = 1;
 	}
 }

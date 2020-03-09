@@ -10,6 +10,8 @@ import { Quadrant } from '../physics/Grid';
 // eslint-disable-next-line no-unused-vars
 import Ground from '../helpers/Ground';
 import {AnimatedSprite} from 'pixi.js';
+// eslint-disable-next-line no-unused-vars
+import Camera from '../helpers/Camera';
 
 interface keysDown {
 	w: boolean;
@@ -29,15 +31,16 @@ export default class Player extends Actor {
 	keysDown: keysDown;
 	mouse: mouse;
 	screen: PIXI.Rectangle;
-	camera: PIXI.Container;
+	camera: Camera;
 	bulletTexture: PIXI.Texture;
 	weaponReady: boolean;
 	reloadTime: number;
+	shotSound: HTMLAudioElement;
 	maxStamina: number;
 	currentStamina: number;
 	sprite: AnimatedSprite;
 
-	constructor(screen: PIXI.Rectangle, camera: PIXI.Container, ground: Ground, texture: PIXI.Texture[], state: Game, quadrant: Quadrant, bulletTexture: PIXI.Texture) {
+	constructor(screen: PIXI.Rectangle, camera: Camera, ground: Ground, texture: PIXI.Texture[], state: Game, quadrant: Quadrant, bulletTexture: PIXI.Texture) {
 		const type = 'player';
 		super(state, type, quadrant, ground);
 
@@ -66,9 +69,11 @@ export default class Player extends Actor {
 
 		this.maxStamina = 100;
 		this.currentStamina = this.maxStamina;
+		this.camera.hud.draw();
 
 		this.weaponReady = true;
 		this.reloadTime = 0;
+		this.shotSound = new Audio('./assets/sounds/shot.wav');
 
 		this.strength = 90;
 		this.movable = true;
@@ -119,9 +124,11 @@ export default class Player extends Actor {
 		if (this.keysDown.shift && this.currentStamina > 0) {
 			this.speed = 8;
 			this.currentStamina = this.currentStamina - 1;
+			this.camera.hud.draw();
 		}
 		if (this.currentStamina < this.maxStamina) {
 			this.currentStamina = this.currentStamina + 0.1;
+			this.camera.hud.draw();
 		}
 		this.status.moving = false;
 		if (this.keysDown.w) {
@@ -200,8 +207,7 @@ export default class Player extends Actor {
 
 	handleKeyPress(event: KeyboardEvent) {
 		if (event.code === 'Escape') {
-			const isPaused = !this.state.pause;
-			this.state.pause = isPaused;
+			this.state.pause();
 		}
 	}
 
@@ -211,7 +217,7 @@ export default class Player extends Actor {
 	}
 
 	handleMouseOut() {
-		this.state.pause = true;
+		this.state.paused = true;
 	}
 
 	handleMouseDown() {
@@ -243,6 +249,7 @@ export default class Player extends Actor {
 
 	shoot() {
 		if (this.weaponReady && this.mouse.pressed) {
+			this.shotSound.play();
 			const shooterFaceCenterX = this.x + this.hitBoxRadius * Math.cos(this.rotation);
 			const shooterFaceCenterY = this.y + this.hitBoxRadius * Math.sin(this.rotation);
 			let bulletQuadrant = this.state.grid.getQuadrantByCoords(shooterFaceCenterX, shooterFaceCenterY);
