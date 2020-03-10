@@ -15,6 +15,8 @@ export interface Actors {
 
 export default class Game extends PIXI.Application {
 	pause: boolean;
+
+	// What do you use the counts for?
 	enemiesCount: number;
 	playersCount: number;
 	projectilesCount: number;
